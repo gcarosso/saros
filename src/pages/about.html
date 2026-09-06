@@ -1,0 +1,74 @@
+<!-- About page. Plain HTML: edit freely, then `make build`. Buttons call Sheet.close()/App.preset()/App.setTab(); keep those if you move them. -->
+<div class="about-hero"><!--LOGO:hero--><div><div class="wm">SAROS</div><div class="tagline">A navigator of today's clinical trial landscape, mapped to the money around it. Its horizon spans 2026–2028. Public sources only, refreshed weekly.</div></div></div>
+<div class="about">
+  <div>
+    <section class="panel"><div class="pb">
+      <h3>What you can do here</h3>
+      <ul>
+        <li><b>See what reads out when.</b> The timeline and calendar hold 10,000+ Phase 1–3 trials by registered primary-completion month. Narrow by phase, status, area, modality, sponsor tier, target or enrollment from the left rail; click any bar, cell or sponsor to focus on it. <b>Clear all</b> at the top of the rail resets everything.</li>
+        <li><b>Open any trial's dossier</b> by clicking its row: the next action and the rule behind it, readout confidence with its reasons, the sponsor's cash and runway against the date, who holds the stock, insider trades, the drug's mechanism with a curated note, an editable rNPV sketch, and every competing trial in the same indication.</li>
+        <li><b>Search by target.</b> Type KRAS, GLP-1 or CD19 in the rail box or in ⌘K and the whole dashboard filters to trials tagged with that mechanism.</li>
+        <li><b>Check the FDA calendar.</b> The FDA tab lists PDUFA, advisory-committee and resubmission dates exactly as companies disclosed them in SEC filings, each with a link to the filing and the sentence it came from. Dates that moved keep their history.</li>
+        <li><b>Look inside private sponsors.</b> Roughly two thirds of sponsors are not listed. Where they have filed Regulation D placements, the dossier shows amounts raised, dates, investor counts and the named officers and directors; NIH awards show non-dilutive funding. The Longevity tab carries the same for venture-backed longevity companies.</li>
+        <li><b>Read a sponsor as a program.</b> Programs &amp; peers profiles a sponsor across every area and phase and lists the sponsors whose programs look most alike, plus which specialist funds crowd into it and where insiders are buying in clusters.</li>
+        <li><b>Track what changed.</b> Each weekly build is diffed against the last: slipped, firmed and new trials are filter flags, and the dossier shows the before and after.</li>
+        <li><b>Keep a book.</b> Star trials (★ or <kbd>W</kbd>) and the Book preset turns the home page into your watchlist with 7/30/90-day catalyst counts. Export any view to CSV.</li>
+      </ul>
+    </div></section>
+    <section class="panel"><div class="pb">
+      <h3>Start with a preset</h3>
+      <div class="ways">
+        <button class="way" onclick="Sheet.close();App.preset('landscape')"><b>Landscape</b><span>The whole universe by date. Best first view: what is reading out in a given month, area or modality.</span></button>
+        <button class="way" onclick="Sheet.close();App.preset('catalysts')"><b>Catalysts</b><span>Phase 3 readouts ranked by impact, with the decision line and cash-to-event visible in the table.</span></button>
+        <button class="way" onclick="Sheet.close();App.preset('book')"><b>Book</b><span>Only your starred trials, with near-term catalyst counts, cash-binding names and specialist adds.</span></button>
+        <button class="way" onclick="Sheet.close();App.preset('private')"><b>Private</b><span>Unlisted sponsors and venture-backed longevity companies: who has raised money, and which of them have a registered readout at all.</span></button>
+      </div>
+      <h3 style="margin-top:12px">Also in the top bar</h3>
+      <ul>
+        <li><b>Sector</b> — the case for and against biotech as a sector, with the published evidence redrawn as charts.</li>
+        <li><b>Visuals</b> — one page of overview charts across the whole snapshot, all click-through.</li>
+        <li><b>Method</b> tab — how every score is built and the exact query and pull date behind every number.</li>
+      </ul>
+      <h3 style="margin-top:12px">Keyboard</h3>
+      <div class="dim" style="font-size:12px;line-height:1.9"><kbd>⌘K</kbd> search trials, targets, sponsors, indications, investors &nbsp; <kbd>⇥</kbd> next tab &nbsp; <kbd>W</kbd> star the open dossier &nbsp; <kbd>J</kbd>/<kbd>K</kbd> next / previous row &nbsp; <kbd>esc</kbd> close</div>
+    </div></section>
+    <section class="panel"><div class="pb notes">
+      <h3>Why "SAROS"</h3>
+      <p>A <b>saros</b> is the cycle of 18 years, 11 days and 8 hours after which the Sun, Earth and Moon return to the same alignment, so an eclipse repeats with nearly the same geometry. Babylonian astronomers found it by keeping a long, honest ledger of dates; by the time of Thales it could be used to say when the next eclipse would come, without any theory of why.</p>
+      <p>That is the stance taken here. A trial readout is a scheduled alignment: a registered date on which a company, a drug and a market meet. This page does not predict the outcome; it keeps the ledger of when those alignments fall, what is known about each party, and how the dates drift from one week to the next. The eclipse in the mark is the moment of the readout, and the moons beneath the timeline are the calendar it runs on.</p>
+    </div></section>
+  </div>
+  <div>
+    <section class="panel"><div class="pb">
+      <h3>How to read a row</h3>
+      <ul>
+        <li><b>Readout</b> — the registered primary-completion date. <span class="badge nme">A</span> means the sponsor reported it as actual. A coloured month badge means it moved since last week. June and December pile-ups are sponsor placeholders; treat them as "sometime that half".</li>
+        <li><b>Conf.</b> — readout confidence, 0–100, a transparent rule score of whether the date will hold. Use it to triage, not to price.</li>
+        <li><b>Prior</b> — the historical share of trials at this phase that advance (oncology vs non-oncology). A base rate, not a view.</li>
+        <li><b>Impact / Action</b> — how much a readout could matter, and the next step an ordered rule list suggests (Pass, Wait, Review flow, Diligence, Size, Monitor). Hover a value for the rule that fired.</li>
+        <li><b>Float</b> — the sponsor's SEC-reported public float, the market-cap proxy for listed names.</li>
+        <li>Boxes that change the view carry an orange corner tab; boxes without one are just numbers. Hover any control, column header or score for a plain-language explanation.</li>
+      </ul>
+    </div></section>
+    <section class="panel"><div class="pb">
+      <h3>Where the numbers come from</h3>
+      <table><thead><tr><th>Source</th><th>What it contributes</th><th>Cadence · join</th></tr></thead><tbody>
+        <tr><td>ClinicalTrials.gov v2</td><td>the trial universe: dates, status, design, enrollment, sites, interventions, summaries</td><td>weekly snapshot; live delta on demand</td></tr>
+        <tr><td>SEC EDGAR full-text search</td><td>PDUFA, AdCom and resubmission dates from 8-K / 6-K / 10-Q / 10-K, each row citing its filing</td><td>weekly · CIK → ticker</td></tr>
+        <tr><td>SEC company tickers + XBRL</td><td>listing, cash and short-term investments, R&amp;D, net income, revenue, public float, shares outstanding</td><td>weekly · sponsor name → issuer</td></tr>
+        <tr><td>SEC EDGAR 13F-HR</td><td>positions of ~30 biotech-specialist funds (generalists counted separately)</td><td>quarterly, 45-day lag · issuer name</td></tr>
+        <tr><td>SEC insider-transactions data sets</td><td>Form 4 open-market buys and sells by officers and directors</td><td>quarterly · CIK / ticker</td></tr>
+        <tr><td>SEC Form D data sets</td><td>Regulation D private placements by biotech / pharma issuers: amounts, dates, investor counts, officers and directors</td><td>quarterly · issuer name → sponsor</td></tr>
+        <tr><td>NIH RePORTER</td><td>NIH research awards for venture-stage sponsors and longevity companies</td><td>weekly · organisation name</td></tr>
+        <tr><td>openFDA Drugs@FDA</td><td>approval actions on NDAs / BLAs since 2025</td><td>weekly</td></tr>
+        <tr><td>Longevity companies</td><td>87 venture-backed longevity companies compiled from public reports: capital raised, investors, status</td><td>July 2026 · sponsor name</td></tr>
+        <tr><td>Wong, Siah &amp; Lo (2019)</td><td>phase-transition base rates, oncology vs non-oncology</td><td>static</td></tr>
+        <tr><td>Mechanism lexicon</td><td>target / mechanism tags and curated one-line notes for named assets</td><td>maintained in the build</td></tr>
+      </tbody></table>
+    </div></section>
+    <section class="panel"><div class="pb notes">
+      <h3>What it will not tell you</h3>
+      <p>Registered dates lag real readouts, especially for open-label early-phase programs, so a date here is when a readout can first exist, not when it will land. Private-round valuations, terms, cap tables and private burn are not public and are shown as unknown rather than estimated. Vendor likelihood scores, paid consensus, deal terms and prescription data are out of scope by design: every source on this page is public and free. Nothing here is advice.</p>
+    </div></section>
+  </div>
+</div>

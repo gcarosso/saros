@@ -1,0 +1,54 @@
+# Hover glossary: one entry per line, `key: explanation`. Keys are referenced by data-gl="key" in the markup or gl('key') in the JS. Edit freely, then `make build`.
+window: Only trials whose registered primary-completion date falls between these months are shown. Primary completion is when the last patient finishes the primary endpoint, so it is the earliest a readout can exist. Default: this month through Dec 2028.
+phase: Phase 1 tests safety and dose, Phase 2 looks for a signal of efficacy, Phase 3 is the pivotal test that supports approval. P1/P2 and P2/P3 are seamless combined designs.
+status: Recruiting status as registered by the sponsor. “Active, not recruiting” means enrollment is closed and patients are in follow-up, the state closest to a readout.
+tier: Sponsor size bucket: about 25 large-pharma groups with subsidiaries mapped, China-domiciled and Japan / Korea companies inferred from names, everything else “Other biopharma”.
+ta: Therapeutic area, assigned by pattern-matching titles, conditions and keywords. Expect a few percent misfiled; the dossier shows the raw fields.
+mo: Modality is what kind of thing the drug is: small molecule, antibody, cell therapy, gene therapy, antibody-drug conjugate and so on, inferred from intervention names.
+moa: Drug target or mechanism, tagged from titles, interventions and summaries by a curated lexicon (PD-1, KRAS G12C inhibitor, GLP-1/GIP…). Pick several to match any of them; type in the box to find one; ⌘K also searches targets.
+formd: Regulation D private placements the company filed with the SEC (Form D): amount sold, offering size, investor count, and named officers and directors. Amounts only; no valuation or terms are public.
+nih: NIH research awards for this organisation from RePORTER, non-dilutive funding with a project abstract behind each award.
+dsg: Design and data flags. Select several to require all of them at once.
+nmin: Hide trials with fewer registered patients than this.
+clear: Reset every filter, chart focus, search term, watchlist mode and the date window back to defaults.
+conf: Readout confidence, 0 to 100: a transparent rule-based score of how likely the registered date is to hold. Actual dates, completed status and fresh records score up; not-yet-recruiting, stale records and stopped studies score down. Triage with it, do not price with it.
+prior: Base-rate prior: the historical share of trials at this phase that advance, oncology versus non-oncology (Wong, Siah & Lo, 2019). A population average, not a view on this asset.
+impact: How much a readout could matter: phase weight × the literature prior × company size (public float) × how firm the date is × a discount when many specialists already hold the name. Bucketed High, Med, Low.
+action: The next action from an ordered rule list (Pass, Wait, Review flow, Diligence, Size, Monitor). Hover a value for the rule that fired. Rules, not advice.
+days: Days from today to the registered primary-completion date. Negative means the date has passed.
+readout: Registered primary-completion date. “A” = the sponsor reported it as actual rather than estimated. Month-only dates sit on the 15th. Red/green badge = moved since the previous snapshot.
+mcap: Public float as reported to the SEC (dei EntityPublicFloat), a market-cap proxy for US filers; ex-US listings show none.
+n: Registered enrollment, planned or actual.
+sponsor: Lead sponsor, mapped to its group (e.g. Genentech → Roche). A dot marks large pharma; the badge is the ticker.
+presets: Same data, different starting question. Book = your starred trials. Catalysts = pivotal readouts sorted by impact. Landscape = the whole universe by date. Private = venture-backed and longevity names.
+refresh: Fetch records ClinicalTrials.gov has updated since this snapshot and show what changed. Works from the local file only; the hosted copy is sandboxed.
+csv: Download the current filtered view as a spreadsheet.
+wl: Your starred trials, kept in this browser. Press W inside a dossier to star it.
+search: Search trials, sponsors, indications and investors (⌘K). Shift+Enter applies the text as a filter to everything.
+kpi-view: Everything that passes the filters on the left plus any focus you clicked in a chart. Informational.
+kpi-p3: Pivotal (Phase 3) readouts due in the next 180 days. Click to filter the view to Phase 3.
+kpi-hi: Phase 3 trials whose readout-confidence score is 75 or more. Click to open the Readout risk tab.
+kpi-act: Share of trials whose completion date the sponsor reports as actual rather than estimated. Higher means a firmer calendar. Informational.
+kpi-enr: Sum of registered enrollment across the view, and the median per trial. Informational.
+kpi-big: How much of the view is large pharma versus China-domiciled sponsors. Click to open Programs & peers.
+tl-mode: Colour the timeline by phase, therapeutic area or sponsor tier. Click a bar to focus on that month.
+dens: Row density of the calendar table.
+f13: Quarterly 13F filings list what US funds hold. Counting biotech-specialist holders is the “specialist consensus” signal; it lags quarter-end by 45 days and excludes shorts.
+form4: Form 4 filings report insider trades. Clustered open-market buys by officers and directors are the signal; sells are routine.
+reg: PDUFA target dates, advisory-committee meetings and planned resubmissions, read from the sponsor’s own SEC filings; each row links to the filing. ≈ means the company only gave a month or quarter.
+rnpv: Risk-adjusted net present value: a deliberately simple sketch you can stress-test, pre-filled from the registry, the literature prior and SEC share counts. Not a forecast.
+decision: Where the ordered rules landed for this trial and why. Impact, date firmness and cash-to-event are the inputs.
+pdufa: PDUFA date: the deadline by which the FDA has committed to act on a filing. The FDA does not publish these; SAROS reads them from the companies’ own SEC filings and links each one to its source.
+tab-cal: Every trial in view, one row each, sortable by any column. Click a row for the dossier.
+tab-spon: The sponsor is the unit of analysis: league table, program profile and the sponsors whose programs look most alike.
+tab-lv: Venture-backed longevity companies compiled from public reports, and aging-adjacent trials from all sponsors.
+tab-map: Trial counts by therapeutic area and phase. Click a cell to focus the whole dashboard on it.
+tab-mod: What kind of drugs are reading out, by phase and area.
+tab-geo: Where the sites are and where sponsors are domiciled.
+tab-fda: The regulatory calendar from SEC filings and recent FDA approval actions.
+tab-risk: How firm the Phase 3 calendar is and which readouts look most likely to happen on time.
+tab-about: How every number is built and where it comes from.
+dash: Back to the dashboard.
+about: What SAROS is, how to read it, what it integrates, and four ways to start.
+sector: Why biotech as a sector, and what can go wrong: the published evidence redrawn — returns, correlation, breadth, expert signals, factor models, long/short, the cycle — with the cautions underneath.
+visuals: One page of overview charts across the whole snapshot: when each modality reads out, areas, sponsors, fund books, longevity companies.

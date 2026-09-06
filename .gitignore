@@ -1,0 +1,25 @@
+# generated artifacts and pulled data — regenerate with `make pull && make process && make build`
+dist/
+saros.html
+readout-radar.html
+data/*.json
+data/*.json.gz
+data/formd_cache/
+data/history/
+data/*.log
+data/*.tar.gz
+data/bpc_raw_sample.json
+# local tooling
+.venv/
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+.claude/
+.DS_Store
+# never in a public repo
+*.pdf
+context/
+design-inspo/
+grok-spec-dashboard/
+bpc_private/
+*.egg-info/

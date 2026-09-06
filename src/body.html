@@ -1,0 +1,175 @@
+<div id="loading"><div>Decompressing snapshot · ClinicalTrials.gov v2 · Drugs@FDA</div><div class="bar"><i></i></div><div id="loadmsg"></div></div>
+<div id="app">
+  <header id="top">
+    <div id="brand" title="Saros: the 18-year cycle on which eclipses repeat · click to return to the dashboard" onclick="Sheet.close()"><!--LOGO--><span class="name">SAROS</span><span class="sub">FY26–28</span></div>
+    <nav id="toplinks"><button class="toplink on" data-sheet="dash" data-gl="dash">Dashboard</button><button class="toplink" data-sheet="about" data-gl="about">About</button><button class="toplink" data-sheet="sector" data-gl="sector">Sector</button><button class="toplink" data-sheet="visuals" data-gl="visuals">Visuals</button></nav>
+    <div id="search" onclick="Pal.open()" data-gl="search"><span>⌕</span><input id="q" placeholder="Search NCT, asset, target, sponsor, indication, investor…" readonly><kbd>⌘K</kbd></div>
+    <div class="seg" id="preset" data-gl="presets"><button data-p="book">Book</button><button data-p="catalysts">Catalysts</button><button data-p="landscape" class="on">Landscape</button><button data-p="private">Private</button></div>
+    <div id="topright">
+      <span class="pill" id="freshpill"><span class="dot amber"></span><span id="freshtxt">snapshot</span></span>
+      <button class="btn" id="refreshbtn" data-gl="refresh">↻ Refresh live</button>
+      <button class="btn" id="exportbtn" data-gl="csv">⇩ CSV</button>
+      <button class="btn" id="wlbtn" data-gl="wl">★ Watchlist <span class="num" id="wlcount">0</span></button>
+    </div>
+  </header>
+
+  <div id="main">
+    <aside id="rail">
+      <div class="railtop"><button class="btn sm" id="clearall" data-gl="clear">✕ Clear all</button><span class="dim2" id="nfilt" style="font-size:11px"></span></div>
+      <div class="fgroup"><div class="lbl" data-gl="window">Primary completion window <button onclick="F.reset('win')">all</button></div>
+        <div class="range"><select id="win0"></select><span class="dim2">→</span><select id="win1"></select></div></div>
+      <div class="fgroup"><div class="lbl" data-gl="phase">Phase <button onclick="F.reset('ph')">all</button></div><div class="chips" id="f-ph"></div></div>
+      <div class="fgroup"><div class="lbl" data-gl="status">Status <button onclick="F.reset('st')">all</button></div><div class="chips" id="f-st"></div></div>
+      <div class="fgroup"><div class="lbl" data-gl="tier">Sponsor tier <button onclick="F.reset('tier')">all</button></div><div class="chips" id="f-tier"></div></div>
+      <div class="fgroup"><div class="lbl" data-gl="ta">Therapeutic area <button onclick="F.reset('ta')">all</button></div><div class="flist" id="f-ta"></div></div>
+      <div class="fgroup"><div class="lbl" data-gl="mo">Modality <button onclick="F.reset('mo')">all</button></div><div class="flist" id="f-mo"></div></div>
+      <div class="fgroup"><div class="lbl" data-gl="moa">Target / mechanism <button onclick="F.reset('moa')">all</button></div><div class="range" style="margin-bottom:6px"><input id="moaq" placeholder="type a target: KRAS, GLP-1, CD19…" autocomplete="off"></div><div class="flist" id="f-moa" style="max-height:260px;overflow:auto"></div></div>
+      <div class="fgroup"><div class="lbl" data-gl="dsg">Design &amp; flags <button onclick="F.reset('dsg')">all</button></div><div class="chips" id="f-dsg"></div></div>
+      <div class="fgroup"><div class="lbl" data-gl="nmin">Enrollment ≥ <span class="num" id="nlbl">0</span></div><input type="range" id="nmin" min="0" max="2000" step="50" value="0" style="width:100%"></div>
+      <div class="railfoot">Snapshot <span class="num" id="snapdate"></span><br>Source query<br><code id="qry"></code></div>
+    </aside>
+
+    <main id="content">
+      <div class="kpis" id="kpis"></div>
+
+      <section class="panel">
+        <div class="ph"><h2>Catalyst timeline</h2><span class="hint">primary-completion dates by month · click a bar to focus · December and June spikes are sponsor placeholder estimates, discount them</span>
+          <div class="tools"><div class="seg" id="tl-mode" data-gl="tl-mode"><button data-m="ph" class="on">by phase</button><button data-m="ta">by area</button><button data-m="tier">by tier</button></div></div></div>
+        <div class="pb"><div class="chart" id="timeline"></div><div id="moons" aria-hidden="true"></div><div class="legend" id="tl-legend"></div><div class="legend" id="pdufa-strip" style="margin-top:6px"></div></div>
+      </section>
+
+      <div class="tabs" id="tabs">
+        <button class="tab on" data-v="cal" data-gl="tab-cal">Readout calendar <span class="n" id="n-cal">0</span></button>
+        <button class="tab" data-v="spon" data-gl="tab-spon">Programs &amp; peers</button>
+        <button class="tab" data-v="lv" data-gl="tab-lv">Longevity <span class="n" id="n-lv">0</span></button>
+        <button class="tab" data-v="map" data-gl="tab-map">Area × phase</button>
+        <button class="tab" data-v="mod" data-gl="tab-mod">Modality</button>
+        <button class="tab" data-v="geo" data-gl="tab-geo">Geography</button>
+        <button class="tab" data-v="fda" data-gl="tab-fda">FDA actions <span class="n" id="n-fda">0</span></button>
+        <button class="tab" data-v="risk" data-gl="tab-risk">Readout risk</button>
+        <button class="tab" data-v="about" data-gl="tab-about">Method</button>
+      </div>
+
+      <div class="view on" id="v-cal">
+        <section class="panel">
+          <div class="ph"><h2 id="cal-title">Readout calendar</h2><span class="hint" id="cal-hint"></span>
+            <div class="tools"><div class="seg" id="cal-dens" data-gl="dens"><button data-d="0" class="on">comfortable</button><button data-d="1">dense</button></div></div></div>
+          <div class="tblwrap" style="max-height:70vh;overflow:auto"><table class="t" id="caltbl"><thead></thead><tbody></tbody></table></div>
+          <div class="pager" id="calpager"></div>
+        </section>
+      </div>
+
+      <div class="view" id="v-spon">
+        <div class="grid3">
+          <section class="panel"><div class="ph"><h2>Sponsor league table</h2><span class="hint">lead sponsor · trials in window, stacked by phase · click to filter</span>
+            <div class="tools"><div class="seg" id="sp-n"><button data-n="25" class="on">top 25</button><button data-n="50">50</button><button data-n="100">100</button></div></div></div>
+            <div class="pb" id="sponsors"></div></section>
+          <div><section class="panel"><div class="ph"><h2 id="prog-title">Program profile</h2><span class="hint">select a sponsor</span></div><div class="pb" id="prog"></div></section>
+          <section class="panel"><div class="ph"><h2>Concentration</h2></div><div class="pb" id="conc"></div></section></div>
+        </div>
+      </div>
+
+      <div class="view" id="v-lv">
+        <div class="kpis" id="lvkpis" style="grid-template-columns:repeat(5,1fr)"></div>
+        <section class="panel">
+          <div class="ph"><h2>Venture-backed longevity companies — clinical presence</h2><span class="hint">87 companies compiled from public reports, July 2026 · matched to registered 2026–28 readouts by sponsor name</span>
+            <div class="tools"><div class="seg" id="lv-f"><button data-f="clin" class="on">in the clinic</button><button data-f="all">all companies</button></div></div></div>
+          <div class="tblwrap" style="max-height:62vh;overflow:auto"><table class="t" id="lvtbl"><thead></thead><tbody></tbody></table></div>
+        </section>
+        <div class="grid2">
+          <section class="panel"><div class="ph"><h2>Capital by company status</h2><span class="hint">total raised, US$ m · shaded = has a registered 2026–28 readout</span></div><div class="pb" id="lvcap"></div></section>
+          <section class="panel"><div class="ph"><h2>Aging-adjacent trials, all sponsors</h2><span class="hint">mechanism / indication keywords: senolytic, mTOR, NAD⁺, sarcopenia, frailty, healthspan, reprogramming…</span></div><div class="pb" id="lvadj" style="max-height:420px;overflow:auto"></div></section>
+        </div>
+      </div>
+
+      <div class="view" id="v-map">
+        <section class="panel"><div class="ph"><h2>Therapeutic area × phase</h2><span class="hint">count of trials · hover for enrollment and readout share · click to filter</span></div>
+          <div class="pb" id="heatmap"></div></section>
+        <div class="grid2">
+          <section class="panel"><div class="ph"><h2>Area by readout quarter</h2><span class="hint">Phase 3 only</span></div><div class="pb" id="taq"></div></section>
+          <section class="panel"><div class="ph"><h2>Enrollment mass by area</h2><span class="hint">sum of planned/actual enrollment</span></div><div class="pb" id="tan"></div></section>
+        </div>
+      </div>
+
+      <div class="view" id="v-mod">
+        <div class="grid2">
+          <section class="panel"><div class="ph"><h2>Modality mix</h2><span class="hint">derived from intervention names and keywords</span></div><div class="pb" id="modmix"></div></section>
+          <section class="panel"><div class="ph"><h2>Modality × phase</h2></div><div class="pb" id="modheat"></div></section>
+        </div>
+        <section class="panel"><div class="ph"><h2>Modality readout cadence</h2><span class="hint">Phase 3 primary completions per quarter</span></div><div class="pb"><div class="chart" id="modcad"></div><div class="legend" id="modcad-legend"></div></div></section>
+      </div>
+
+      <div class="view" id="v-geo">
+        <div class="grid2">
+          <section class="panel"><div class="ph"><h2>Site footprint by country</h2><span class="hint">trials with ≥1 site in country</span></div><div class="pb" id="geo"></div></section>
+          <section class="panel"><div class="ph"><h2>Sponsor domicile signal</h2><span class="hint">heuristic from lead-sponsor name</span></div><div class="pb" id="dom"></div></section>
+        </div>
+      </div>
+
+      <div class="view" id="v-fda">
+        <section class="panel">
+          <div class="ph"><h2 data-gl="pdufa">Regulatory calendar</h2><span class="hint" id="pdufa-hint">PDUFA, AdCom and resubmission dates as disclosed in SEC filings · each row cites its filing</span>
+            <div class="tools"><div class="seg" id="pd-f"><button data-f="all" class="on">all</button><button data-f="pdufa">PDUFA</button><button data-f="adcom">AdCom</button><button data-f="prio">priority</button></div></div></div>
+          <div class="pb"><div class="chart" id="pdufachart"></div></div>
+          <div class="tblwrap" style="max-height:52vh;overflow:auto"><table class="t" id="pdufatbl"><thead></thead><tbody></tbody></table></div>
+        </section>
+        <section class="panel">
+          <div class="ph"><h2>FDA approval actions</h2><span class="hint">Drugs@FDA submissions with status Approved · 2025 → present</span>
+            <div class="tools"><div class="seg" id="fda-f"><button data-f="nme" class="on">novel (NDA/BLA originals)</button><button data-f="eff">efficacy supplements</button><button data-f="all">all originals</button></div></div></div>
+          <div class="pb"><div class="chart" id="fdachart"></div></div>
+          <div class="tblwrap" style="max-height:60vh;overflow:auto"><table class="t" id="fdatbl"><thead></thead><tbody></tbody></table></div>
+          <div class="pager" id="fdapager"></div>
+        </section>
+      </div>
+
+      <div class="view" id="v-risk">
+        <div class="grid2">
+          <section class="panel"><div class="ph"><h2>Readout-confidence distribution</h2><span class="hint">heuristic score, Phase 3 in window</span></div><div class="pb"><div class="chart" id="riskhist"></div></div></section>
+          <section class="panel"><div class="ph"><h2>Signals</h2></div><div class="pb" id="risksig"></div></section>
+        </div>
+        <section class="panel"><div class="ph"><h2>Highest-conviction Phase 3 readouts next 180 days</h2><span class="hint">confidence ≥ 75 · sorted by date</span></div>
+          <div class="tblwrap" style="max-height:60vh;overflow:auto"><table class="t" id="risktbl"><thead></thead><tbody></tbody></table></div></section>
+      </div>
+
+      <div class="view" id="v-about">
+        <div class="grid2">
+          <section class="panel"><div class="ph"><h2>Data provenance</h2></div><div class="pb" id="prov"></div></section>
+          <section class="panel"><div class="ph"><h2>Method notes</h2></div><div class="pb notes">
+            <p><b>Universe.</b> Interventional studies with an industry lead sponsor whose primary-completion date falls in calendar 2026–2028, Phase 1 through Phase 3, as registered on ClinicalTrials.gov. The default window is the current month through Dec 2028, the whole registered universe; narrow it in the rail. Registered dates lag real readouts: open-label early-phase programs routinely read out interim data a year or more before the registered date. Dates are sponsor-estimated unless flagged <span class="mono">ACTUAL</span>; month-precision dates are placed on the 15th.</p>
+            <p><b>Trial health.</b> Enrollment pace is registered enrollment divided by months from start to primary completion; site density is sites per 100 patients. Both are compared with the median of trials in the same area and phase in this universe. A study enrolling below half its peer median pace loses six confidence points unless it is completed or reports an actual date.</p><p><b>rNPV sketch</b> is a deliberately simple model — linear ramp, flat plateau, three-year erosion after exclusivity, single discount rate, one cost-to-complete number — pre-filled from the registry, the literature prior and SEC cover-page share counts. It exists so a number can be stress-tested in the dossier, not to replace a proper model.</p><p><b>Readout confidence</b> is a transparent heuristic, not a model fit: it rewards actual (vs. estimated) completion dates, completed or active-not-recruiting status, actual enrollment counts and recent registry updates, and penalises not-yet-recruiting status, stale records and stopped studies. Use it to triage, not to price.</p>
+            <p><b>Decision rules.</b> Each trial carries a next action from an ordered rule list, shown with its trigger: stopped → <i>Pass</i>; cash months &lt; months to readout → <i>Pass / hedge</i> (cash binding); completion date passed or estimated inside 90 days → <i>Wait</i>; ≥2 specialists new last quarter or an insider buy cluster inside 180 days → <i>Review flow</i>; enrollment pace below half the peer median → <i>Diligence enrollment</i>; Phase 3 with firm/guided date and confidence ≥75 → <i>Size / diligence endpoints</i>; other Phase 3 inside 6 months → <i>Diligence endpoints</i>; else <i>Monitor</i>. Date reliability is <i>firm</i> (actual date), <i>estimated</i> (registry estimate), or <i>slipped</i> (primary completion pushed out by a month or more since the previous weekly snapshot, unless the move was off a June/December placeholder or onto an actual date — that is a <i>firming</i>). A slipped date is a <i>Wait</i>: the registry just said the plan changed. Impact = phase weight × (0.5 + literature prior) × size factor (log public float) × firmness × crowding discount, bucketed High ≥0.62 / Med ≥0.35 / Low. All of it is rules, none of it is advice.</p>
+            <p><b>Snapshot diff.</b> Each weekly build is compared with the previous one, trial by trial: primary-completion date (with the size of the move in months), estimated → actual, status, enrollment and why-stopped. <i>Slipped</i>, <i>Date firmed</i> and <i>New this snapshot</i> are filterable flags in the rail; the dossier lists the raw before → after values, and each build's diff is kept under <span class="mono">data/history</span>. Registry dates lag real readouts, so a single slip mostly confirms what the market has priced; the second slip is the signal.</p>
+            <p><b>Base-rate priors</b> are phase-transition probabilities from Wong, Siah &amp; Lo (2019, <i>Biostatistics</i>), oncology vs. non-oncology, shown for context only. They are population averages and say nothing about a specific asset.</p>
+            <p><b>Therapeutic area</b> and <b>modality</b> are assigned by pattern-matching titles, conditions, keywords and intervention names. Expect a few percent mis-assignments; the dossier shows the raw fields so you can check.</p>
+            <p><b>Sponsor tier.</b> "Large pharma" is a fixed list of ~25 groups with subsidiaries mapped (e.g. Genentech → Roche, Janssen → J&amp;J). "China-domiciled" is inferred from corporate suffixes and city names in the registered sponsor string.</p>
+            <p><b>FDA actions</b> come from the openFDA Drugs@FDA endpoint. It covers approval actions on NDAs/BLAs/ANDAs, not target dates, which the FDA does not publish.</p>
+            <p><b>Regulatory calendar.</b> PDUFA target dates, advisory-committee meetings and planned resubmissions are read from the companies' own SEC filings: EDGAR full-text search over 8-K, 6-K, 10-Q and 10-K documents and their press-release exhibits for the trailing 24 months, refreshed weekly on the trailing three weeks. Each date is classified from its own sentence, carries day, month or quarter precision (≈ marks a period-end placeholder), and cites the filing it came from; when a later filing states a different date the earlier statement is kept as history and the row is marked <i>moved</i>. Confidence is <i>firm</i> for an exact date in a filing under six months old and <i>guided</i> otherwise. Filers are resolved to tickers by CIK. Coverage trails a paid calendar for companies that only say the date on a call or a slide, and a date inside an image exhibit is invisible to text search. Market cap is proxied by the SEC-reported public float; per-share values use cover-page shares outstanding.</p>
+            <p><b>Private companies.</b> Sponsors with no equity linkage — about two thirds of the universe — are resolved by name (current and previous legal names) to SEC Form D issuers in the Biotechnology and Pharmaceuticals industry groups, which gives Regulation D placements since 2019: amount sold per notice, offering size, investor count, and the officers, directors and promoters named on the filing. NIH RePORTER supplies non-dilutive awards by organisation name for the venture-stage tail and for the longevity companies, most of which are pre-IND and absent from ClinicalTrials.gov. Neither source contains valuations, terms, cap tables, burn or board seats; those are stated as unknown rather than estimated.</p>
+            <p><b>Programs &amp; peers.</b> The sponsor, not the trial, is the unit of analysis: each program is a vector over area × phase × modality, and peers are the sponsors with the highest cosine similarity on that vector. Trials are coordinates, not oracles — the peer set is how a readout should be read.</p>
+            <p><b>Specialist ownership.</b> Latest two 13F-HR information tables for a fixed list of biotech-specialist managers (Baker Bros, Perceptive, RA, OrbiMed, Deerfield, Redmile, Avoro, EcoR1, Logos, Cormorant, Boxer, Vivo, Frazier, Rock Springs, Braidwell, Commodore, Darwin, Paradigm, Bain LS, Vestal Point, Samsara, TCG Crossover, Ally Bridge, Sofinnova, Sectoral, Tang, BVF); multi-strategy managers such as Point72, Viking, Woodline and Polar are deliberately excluded because their books dilute the signal, aggregated by issuer and matched to sponsors by name. This is the "specialist consensus" quality signal; count of holders matters more than dollars, and a 45-day lag applies.</p><p><b>Insider activity.</b> Open-market purchases and sales (Form 4 transaction codes P and S) from the SEC's quarterly insider-transactions data sets, aggregated by issuer over the last two published quarters and joined by issuer CIK or ticker. The current quarter is not yet published, so the window ends at the last quarter-end. FINRA consolidated short interest is shown where the public feed responds.</p><p><b>Longevity companies.</b> Names compiled from public reports (July 2026) are matched to lead-sponsor strings; aging-adjacent trials are flagged by mechanism and indication keywords across all sponsors. Capital raised is as publicly reported and is not re-verified here.</p>
+            <p><b>Live refresh</b> queries the ClinicalTrials.gov v2 API for records updated since the snapshot and merges them in place. Hosted viewers sandbox outbound requests; run the local copy for live mode.</p>
+          </div></section>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <footer id="status">
+    <span id="st-rec"></span><span id="st-idx"></span><span id="st-diff"></span><span id="st-render"></span><span id="st-mem"></span><span class="sp"></span><span id="st-key">⌘K search · ⇥ tabs · esc close · W watch</span>
+  </footer>
+</div>
+
+<div id="tip"></div>
+
+<div class="sheet" id="sheet-about"><div class="sh"><h2>About SAROS</h2><span class="hint">what it is, how to read it, where the numbers come from</span><button class="x" onclick="Sheet.close()" title="Close (esc)">×</button></div><div class="sb">
+<!--PAGE:about-->
+</div></div>
+<div class="sheet" id="sheet-sector"><div class="sh"><h2>Sector</h2><span class="hint">the case for biotech versus other sectors, and the case against — distilled from Verdad's <i>Biotech Investing</i> (Obenshain, Rasmussen &amp; Wintner, 2025); charts redrawn from the paper's published values</span><button class="x" onclick="Sheet.close()" title="Close (esc)">×</button></div><div class="sb">
+<!--PAGE:sector-->
+</div></div>
+<div class="sheet" id="sheet-visuals"><div class="sh"><h2>Visuals</h2><span class="hint">the whole snapshot at a glance — all 2026–28 trials, regardless of filters · hover any mark · click a bar, dot or cell to filter the dashboard to it</span><button class="x" onclick="Sheet.close()" title="Close (esc)">×</button></div><div class="sb">
+<!--PAGE:visuals-->
+</div></div>
+<aside id="dossier" aria-label="Trial dossier"><div class="dh"><div style="flex:1"><div class="lbl" id="d-eye"></div><h3 id="d-title"></h3><div id="d-tags"></div></div><button class="x" onclick="Dossier.close()" title="Close (esc)">×</button></div><div class="db" id="d-body"></div></aside>
+<div id="pal" onclick="if(event.target===this)Pal.close()"><div class="box"><input id="palq" placeholder="Search trials, targets, sponsors, indications, investors… (try: KRAS G12C, GLP-1, obesity, Baker Bros)"><div class="res" id="palres"></div><div class="foot"><span><kbd>↑↓</kbd> navigate</span><span><kbd>↵</kbd> open</span><span><kbd>⇧↵</kbd> filter to query</span><span><kbd>esc</kbd> close</span></div></div></div>
+<div class="toast" id="toast"></div>

@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "saros"
+version = "0.9.0"
+description = "SAROS — the 2026–2028 clinical-trial readout landscape, joined to the money around it. Public sources only."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "Apache-2.0" }
+authors = [{ name = "Giovanni A. Carosso" }]
+dependencies = []          # the pipeline is standard library only, on purpose
+
+[tool.setuptools]
+py-modules = []          # no importable package; the repo is a pipeline + a static build
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "ruff>=0.5"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 200
+target-version = "py39"
+extend-exclude = ["data/formd_cache", "dist"]
+
+[tool.ruff.lint]
+# correctness only: syntax errors, undefined names, unused imports. The pipeline is written dense on purpose (see CLAUDE.md),
+# so layout rules are not enforced.
+select = ["E9", "F63", "F7", "F82", "F401", "F811", "F821"]

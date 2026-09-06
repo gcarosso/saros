@@ -1,0 +1,88 @@
+rank,company,what_they_do,total_raised_usd_m,total_rounds,last_round_date,last_round_amount_usd_m,last_round_type,key_investors,current_stage,confidence
+1,Altos Labs,Cellular rejuvenation therapies,3000,1,January 2022,3000,Venture financing,Jeff Bezos; Yuri Milner-linked capital; ARCH Venture Partners,Active,Full
+2,Insilico Medicine,AI drug discovery,811,6,December 2025,293,IPO,Value Partners; Warburg Pincus; Qiming Venture Partners,IPO,Partial
+3,BioSplice Therapeutics,Alternative splicing therapeutics,778,3,April 2021,120,Equity financing,Eventide; aMoon; SymBiosis II,Active,Strong
+4,NewLimit,Epigenetic cell reprogramming,715,4,June 2026,435,Series C,Founders Fund; Thrive Capital; Greenoaks,Active,Strong
+5,BioAge Labs,Metabolic aging therapeutics,492,5,September 2024,198,IPO,Sofinnova Investments; Andreessen Horowitz; Elad Gil,IPO,Strong
+6,Celularity,Placenta-derived cell therapies,408,6,October 2025,2,Preferred private placement,Celgene; United Therapeutics; Dragasac,IPO,Partial
+7,Human Longevity,Genomics health intelligence,330,4,Undisclosed 2024,,Equity investment,Celgene; Illumina; TVM Capital Healthcare,Active,Partial
+8,Unity Biotechnology,Senolytic aging therapies,297,4,May 2018,85,IPO,ARCH Venture Partners; Fidelity; EcoR1 Capital,Shutdown,Partial
+9,Loyal,Dog longevity medicines,250,6,February 2026,100,Series C,age1; Baillie Gifford; Bain Capital Ventures,Active,Partial
+10,Life Biosciences,Cellular rejuvenation therapies,237,4,April 2026,80,Series D,Alpha Wave Ventures; LeFrak; Abundance Partners,Active,Strong
+11,Proteostasis Therapeutics,Protein-homeostasis therapeutics,235,6,October 2018,74,Public equity offering,Cormorant; NEA; Novartis Venture Fund,Acquired,Strong
+12,Nura Bio,Neuroprotective SARM1 inhibitors,215,3,June 2026,74,Series B,The Column Group; Euclidean Capital; Sanofi Ventures,Active,Full
+13,Retro Biosciences,Healthspan extension therapeutics,180,1,April 2022,180,Seed,Sam Altman,Active,Partial
+14,Juvenescence,Longevity drug portfolio,165,3,August 2019,100,Series B,Grok Ventures; IPGL; founders,Active,Partial
+15,resTORbio,Aging-related mTOR therapeutics,163,3,January 2018,98,IPO,OrbiMed; Fidelity; PureTech,Acquired,Full
+16,Cambrian Bio,Healthspan biotech portfolio,160,2,October 2021,100,Series C,Anthos Capital; SALT Fund; Apeiron Investment Group,Active,Full
+17,Alzheon,Alzheimer's oral therapeutics,160,4,June 2024,100,Series E,Alerce Medical Technology Partners; Ally Bridge Group,Active,Partial
+18,Syntara,ECM-dysfunction drug development,151,8,June 2026,6,Placement / SPP,Institutional investors; sophisticated investors; eligible shareholders,IPO,Partial
+19,Aeovian Pharmaceuticals,Selective mTORC1 inhibitors,142,3,December 2025,55,Series B,Luma Group; CTI Life Sciences; Hevolution,Active,Full
+20,Longeveron,Regenerative cell therapies,96,8,March 2026,15,Private placement,Coastlands Capital; Janus Henderson Investors; Logos Capital,IPO,Strong
+21,Juvena Therapeutics,AI regenerative biologics,84,3,January 2026,34,Series B,Bison Ventures; Eli Lilly; Jefferson Life Sciences,Active,Strong
+22,Rejuveron Life Sciences,Healthy-aging therapeutics platform,76,2,September 2023,75,Series B / convertible loan,Catalio; Apeiron; Mubadala Capital,Active,Partial
+23,Navitor Pharmaceuticals,mTORC1-targeted therapeutics,72,3,April 2020,15,Series D preferred equity,Supernus; Brace Pharma; Polaris Partners,Acquired,Strong
+24,Elevian,Regenerative GDF11 medicines,61,3,September 2021,40,Series A,Prime Movers Lab; Bold Capital; Kizoo Ventures,Active,Full
+25,Gordian Biotechnology,In vivo aging drug discovery,60,1,April 2024,60,Venture / raised to date,The Longevity Fund; Founders Fund; Gigafund,Active,Partial
+26,CohBar,Mitochondrial peptide therapeutics,59,5,Undisclosed 2023,15,Merger-linked PIPE,Public investors; Morphogenesis affiliate; Cantor Fitzgerald,Acquired,Partial
+27,Retrotope,Neurodegenerative disease therapeutics,59,7,January 2021,,Series D,SDL Ventures; MP Advisors; North Texas Angel Network,Acquired,Partial
+28,Rubedo Life Sciences,Senescent-cell therapies for aging,52,2,April 2024,40,Series A,Khosla Ventures; Ahren Innovation Capital; Hevolution,Active,Full
+29,Spring Discovery,AI aging drug discovery,48,2,Undisclosed,30,Undisclosed equity,First Round; General Catalyst; Caffeinated Capital,Acquired,Partial
+30,Arda Therapeutics,Targeted pathogenic cell depletion,43,1,October 2024,43,Series A,a16z Bio + Health; Two Sigma Ventures; Eli Lilly,Active,Full
+31,Mitotech,Mitochondria-targeted small molecules,43,1,Undisclosed,43,Undisclosed funding,Not disclosed,Active,Low
+32,Alkahest,Plasma-proteome aging therapies,41,2,March 2015,38,Strategic equity,Grifols; Nan Fung Life Sciences,Acquired,Strong
+33,Amplifier Therapeutics,AMPK activators for aging diseases,38,3,October 2023,33,Series A,Cambrian Bio; RA Capital Management; Future Ventures,Active,Partial
+34,Jocasta Neuroscience,Klotho cognitive decline therapy,35,1,August 2025,35,Series A,True Ventures; Moore Strategic Ventures; SC8 Investments,Active,Full
+35,Tolerance Bio,Thymus immune tolerance therapies,35,2,June 2026,15,Series A,Columbus Venture Partners; Criteria Bio Ventures; Beyond Celiac Investments,Active,Strong
+36,Gero,AI aging drug discovery,34,5,June 2026,17,New financing,Melnichek Investments; Bulba Ventures,Active,Partial
+37,Sierra Sciences,Telomere aging research,33,,,,,Not disclosed,Active,Low
+38,MindImmune Therapeutics,Neuroinflammation Alzheimer's therapeutics,31,3,November 2025,18,Series A extension,Dolby Family Ventures; Pfizer Ventures; Gates Frontier,Active,Strong
+39,Turn Biotechnologies,mRNA epigenetic cell rejuvenation,30,4,September 2023,29,Series A,Khosla Ventures; Astellas Venture Management; Daewoong Pharmaceutical,Active,Partial
+40,Shift Bioscience,AI cell rejuvenation discovery,29,7,October 2024,16,Seed,BGF; F-Prime Capital; Kindred Capital,Active,Partial
+41,Samsara Therapeutics,Autophagy drugs for neurodegeneration,28,3,Undisclosed 2021,25,Series A,Apollo Health Ventures,Active,Partial
+42,Repair Biotechnologies,Cholesterol-degrading aging therapies,26,8,November 2025,5,Series A,Jim Mellon; LongevityTech.fund; Thynk Capital,Active,Partial
+43,Cyclarity Therapeutics,Toxic cholesterol disease therapies,24,4,December 2024,6,Series A tranche,Ki Tua Fund; Kizoo; Formic Ventures,Active,Strong
+44,LyGenesis,Lymph-node organ regeneration,22,2,October 2023,19,Series A-2,Prime Movers Lab; Juvenescence,Active,Strong
+45,Rejuvenate Biomed,Sarcopenia drug development,22,2,October 2021,18,Series B,Rejuveron Life Sciences; Vesalius Biocapital; JLABS,Active,Strong
+46,Junevity,siRNA cell reprogramming therapies,20,2,December 2025,10,Seed extension,Goldcrest Capital; Godfrey Capital,Active,Full
+47,AgeX Therapeutics,Regenerative therapeutics for aging diseases,20,3,March 2019,5,Post-IPO Equity,Juvenescence; BioTime-related investors,Acquired,Strong
+48,Deciduous Therapeutics,Senescent-cell immune therapies,17,2,December 2022,10,Seed,Owl Capital Group; Bold Capital Partners; Humboldt Fund,Active,Partial
+49,Rejuvenate Bio,Age-related gene therapies,16,2,June 2026,6,Financing,VCapital; Merck Animal Health; Digitalis,Active,Strong
+50,Longevica,Longevity therapeutics platform,16,3,August 2022,0,SAFE,Xploration Capital; Rostock Group; Foundation Venture Capital Group,Acquired,Partial
+51,Chronos Therapeutics,Neuropsychiatry drug assets,16,2,December 2013,13,Series B,University of Oxford; Vulpes Investment Management; Odey funds,Acquired,Strong
+52,Oisin Biotechnologies,Genetic senolytic aging therapies,15,1,July 2024,15,Series A,AbbVie Ventures; Althea Group; Healthspan Capital,Active,Low
+53,Booster Therapeutics,Proteasome activator medicines,15,1,October 2024,15,Seed,Apollo Health Ventures; Novo Holdings; Korify Capital,Active,Full
+54,Generation Lab,Biological aging diagnostics,15,2,October 2025,11,Seed,Accel; Samsung Next; Aoki Labs,Active,Strong
+55,GlycanAge,Glycan biological age testing,13,2,December 2025,9,Series A,Fifth Quarter Ventures; Guinness Ventures; BrightCap Ventures,Active,Strong
+56,Morphoceuticals,Bioelectric tissue regeneration,13,2,September 2024,4,Seed,Prime Movers Lab; Juvenescence,Active,Partial
+57,MitoRx Therapeutics,Mitochondrial metabolic therapeutics,12,3,November 2025,7,Pre-Series A,Oshen Holdings; UKI2S; Wren Capital,Active,Strong
+58,Circulate Health,Therapeutic plasma exchange longevity,12,1,July 2025,12,Seed,Khosla Ventures; Seaside Ventures; CSC Ventures,Active,Full
+59,Edifice Health,Inflammatory healthspan diagnostics,12,1,March 2021,12,Seed,Human Longevity; Longevity Incubator Fund; Better Food Ventures,Active,Strong
+60,Epiterna,Aging-focused drug discovery,11,1,August 2023,11,Seed,Prima Materia,Active,Strong
+61,Rejuvenation Technologies,Telomere-extending mRNA therapeutics,11,1,September 2023,11,Seed,Khosla Ventures; Shanda Ventures; Y Combinator,Active,Partial
+62,NaNotics,Subtractive nanoparticle therapeutics,10,3,September 2024,,Accelerator / Incubator,LifeSpan Vision Ventures; Lauder Partners; Melnichek Investments,Active,Partial
+63,Tally Health,Biological age testing platform,10,1,April 2023,10,Seed,Forerunner Ventures; L Catterton; G9 Ventures,Active,Full
+64,FoxBio,Small-molecule senolytic drugs,10,1,July 2018,10,JV equity financing,Juvenescence; Antoxerene; Kizoo,Active,Partial
+65,clock.bio,Stem-cell rejuvenation therapeutics,9,2,October 2024,5,Seed,LocalGlobe; BlueYard Capital; Onsight Ventures,Active,Strong
+66,SENISCA,RNA senotherapeutics for aging diseases,9,3,March 2024,5,Seed / pre-Series A,Lifespan Vision Ventures; Emerging Longevity Ventures; QantX,Active,Strong
+67,AgelessRx,Longevity telehealth platform,8,2,March 2026,5,Equity / Seed-Series A,Not publicly disclosed,Active,Partial
+68,Genflow Biosciences,SIRT6 gene therapies for aging,8,5,May 2026,0,Warrant exercise / Post-IPO Equity,Eric Leire; Gad Berdugo; Premier Miton,IPO,Strong
+69,Revel Pharmaceuticals,Enzyme repair therapies,8,1,March 2022,8,Seed,Kizoo Technology Capital; Starbloom Capital; Tubus LLC,Active,Strong
+70,Thymmune Therapeutics,Thymic cell therapies,7,1,March 2023,7,Seed,Pillar VC; NYBC Ventures,Active,Full
+71,Matter Bio,Genomic integrity longevity therapeutics,7,1,May 2024,7,Seed,Lifespan Vision Ventures; quadraScope Ventures,Active,Full
+72,Vasa Therapeutics,Cardiovascular aging therapeutics,6,1,January 2024,6,Seed,Orphinic Scientific; NuFund Venture Group; SeedFolio,Active,Full
+73,NADMED,NAD metabolite diagnostics,4,2,August 2024,4,Series A,Nordic Science Investments; Voima Ventures; University of Helsinki Funds,Active,Strong
+74,Everon Biosciences,Anti-aging small-molecule therapeutics,4,1,Undisclosed,4,Undisclosed Private Financing,Skolkovo Foundation,Active,Low
+75,Reservoir Neuroscience,Brain vascular therapeutics,4,1,November 2023,4,Seed,Kizoo; R42 Group,Active,Full
+76,Ichor Therapeutics,Aging-focused CRO and therapeutics,3,6,September 2022,0,Seed Extension,Kizoo; Methuselah Foundation; Roger Bagg,Active,Partial
+77,Gerostate Alpha,Drugs for aging diseases,3,2,November 2021,1,Equity Crowdfunding / SAFE,Y Combinator; Longevitytech.fund; Sand Hill Angels,Shutdown,Partial
+78,Cleara Biotech,Senescence therapies for chronic disease,3,2,September 2022,3,Seed,Apollo Health Ventures; Curie Capital; ROM Utrecht Region,Active,Strong
+79,Life Length,Telomere diagnostics platform,3,6,January 2024,2,Undisclosed / EIC-linked,EIC Fund; European Union; Carlos Genzor,Active,Partial
+80,Lysoclear,Enzyme therapies for eye disease,3,1,March 2019,3,Series A,Kizoo,Active,Strong
+81,ImmuneAge Bio,Immune rejuvenation drug discovery,2,2,July 2024,2,Seed,1517 Fund; Jack O'Meara; Alberto Santagostino,Active,Strong
+82,SIWA Therapeutics,Senescent-cell antibody therapeutics,2,1,May 2017,2,Seed,Not disclosed,Active,Partial
+83,Antoxerene,Senolytic small-molecule discovery,2,1,June 2017,2,Seed,Kizoo; SENS Research Foundation,Shutdown,Strong
+84,Auctus Biologics,Antibody mimetic scaffold therapeutics,2,1,September 2018,2,Seed,Grapeseed.Bio,Active,Strong
+85,Five Alarm Bio,Small molecules targeting aging,1,2,February 2023,1,Series A / Early-stage,Cambridge Angels; o2h Ventures; SyndicateRoom,Active,Partial
+86,Genescient,Genomics for aging therapeutics,1,1,Undisclosed,1,Undisclosed Private Financing,Undisclosed investors,Active,Low
+87,BioViva,Gene therapies for cellular aging,0,2,April 2022,0,Securities Financing,Undisclosed investor,Active,Partial
