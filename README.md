@@ -8,7 +8,7 @@ Live at [saros.gcarosso.bio](https://saros.gcarosso.bio). Built by [Giovanni Car
 
 ![SAROS — readout calendar, catalyst timeline, dossier](docs/screenshot.png)
 
-SAROS is a clinical trial readout calendar for specialist biotech investors. It holds every industry-sponsored Phase 1–3 trial registered on ClinicalTrials.gov with a primary-completion date in 2026–2028 (10,000+), and joins each one to what public filings say about the sponsor: cash and runway from SEC XBRL, specialist-fund ownership from 13F, insider trades from Form 4, PDUFA and advisory-committee dates as disclosed in SEC filings, private rounds from Form D, NIH awards, and a curated mechanism note. It is a single HTML file with no server. A plain-text summary of the method is at [saros.gcarosso.bio/method.html](https://saros.gcarosso.bio/method.html).
+SAROS is a clinical trial readout calendar for specialist biotech investors. It holds every industry-sponsored Phase 1–3 trial registered on ClinicalTrials.gov with a primary-completion date in 2026–2028 (10,000+), and joins each one to what public filings say about the sponsor: cash and runway from SEC XBRL, specialist-fund ownership from 13F, insider trades from Form 4, PDUFA and advisory-committee dates as disclosed in SEC filings, private rounds from Form D, NIH awards, and a curated mechanism note. It is a single HTML file with no server. A plain-text summary of the method is at [saros.gcarosso.bio/method](https://saros.gcarosso.bio/method).
 
 ## What you can do with it
 
