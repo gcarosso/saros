@@ -8,7 +8,7 @@ Live at [saros.gcarosso.bio](https://saros.gcarosso.bio). Built by [Giovanni Car
 
 ![SAROS — readout calendar, catalyst timeline, dossier](docs/screenshot.png)
 
-> [PARAGRAPH — Gio: what this is and who it is for, in your words. Suggested facts to draw on: every industry-sponsored Phase 1–3 trial registered on ClinicalTrials.gov with a primary-completion date in 2026–28 (10,000+), joined per trial to sponsor cash and runway (SEC XBRL), specialist-fund ownership (13F), insider trades (Form 4), PDUFA / AdCom dates as disclosed in SEC filings, private-round funding (Form D), NIH awards, and a curated mechanism note. Built for specialist biotech investors; a single HTML file, no server.]
+SAROS is a clinical trial readout calendar for specialist biotech investors. It holds every industry-sponsored Phase 1–3 trial registered on ClinicalTrials.gov with a primary-completion date in 2026–2028 (10,000+), and joins each one to what public filings say about the sponsor: cash and runway from SEC XBRL, specialist-fund ownership from 13F, insider trades from Form 4, PDUFA and advisory-committee dates as disclosed in SEC filings, private rounds from Form D, NIH awards, and a curated mechanism note. It is a single HTML file with no server. A plain-text summary of the method is at [saros.gcarosso.bio/method.html](https://saros.gcarosso.bio/method.html).
 
 ## What you can do with it
 
@@ -52,7 +52,10 @@ open dist/saros.html
 
 ## What it will not tell you
 
-[SECTION — Gio: the honest limits. Suggested: registered dates lag real readouts, especially open-label early-phase programs, so a date here is when a readout can first exist, not when it will land; private-round valuations, terms, cap tables and private burn are not public and are shown as unknown, never estimated; vendor likelihood scores, paid consensus, deal terms and prescription data are out of scope by design. Nothing here is advice.]
+- **Registered dates lag real readouts.** A primary-completion date is when a readout can first exist, not when it will land; open-label early-phase programs drift the most, and June and December pile-ups are sponsor placeholders.
+- **Private companies stay opaque.** Round valuations, terms, cap tables and private burn are not public; they are shown as unknown, never estimated.
+- **Out of scope by design:** vendor likelihood-of-approval scores, paid consensus, deal terms and prescription data.
+- Nothing here is investment advice.
 
 ## Layout
 
