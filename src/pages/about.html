@@ -50,25 +50,9 @@
         <li>Boxes that change the view carry an orange corner tab; boxes without one are just numbers. Hover any control, column header or score for a plain-language explanation.</li>
       </ul>
     </div></section>
-    <section class="panel"><div class="pb">
-      <h3>Where the numbers come from</h3>
-      <table><thead><tr><th>Source</th><th>What it contributes</th><th>Cadence · join</th></tr></thead><tbody>
-        <tr><td>ClinicalTrials.gov v2</td><td>the trial universe: dates, status, design, enrollment, sites, interventions, summaries</td><td>weekly snapshot; live delta on demand</td></tr>
-        <tr><td>SEC EDGAR full-text search</td><td>PDUFA, AdCom and resubmission dates from 8-K / 6-K / 10-Q / 10-K, each row citing its filing</td><td>weekly · CIK → ticker</td></tr>
-        <tr><td>SEC company tickers + XBRL</td><td>listing, cash and short-term investments, R&amp;D, net income, revenue, public float, shares outstanding</td><td>weekly · sponsor name → issuer</td></tr>
-        <tr><td>SEC EDGAR 13F-HR</td><td>positions of ~30 biotech-specialist funds (generalists counted separately)</td><td>quarterly, 45-day lag · issuer name</td></tr>
-        <tr><td>SEC insider-transactions data sets</td><td>Form 4 open-market buys and sells by officers and directors</td><td>quarterly · CIK / ticker</td></tr>
-        <tr><td>SEC Form D data sets</td><td>Regulation D private placements by biotech / pharma issuers: amounts, dates, investor counts, officers and directors</td><td>quarterly · issuer name → sponsor</td></tr>
-        <tr><td>NIH RePORTER</td><td>NIH research awards for venture-stage sponsors and longevity companies</td><td>weekly · organisation name</td></tr>
-        <tr><td>openFDA Drugs@FDA</td><td>approval actions on NDAs / BLAs since 2025</td><td>weekly</td></tr>
-        <tr><td>Longevity companies</td><td>87 venture-backed longevity companies compiled from public reports: capital raised, investors, status</td><td>July 2026 · sponsor name</td></tr>
-        <tr><td>Wong, Siah &amp; Lo (2019)</td><td>phase-transition base rates, oncology vs non-oncology</td><td>static</td></tr>
-        <tr><td>Mechanism lexicon</td><td>target / mechanism tags and curated one-line notes for named assets</td><td>maintained in the build</td></tr>
-      </tbody></table>
-    </div></section>
     <section class="panel"><div class="pb notes">
-      <h3>What it will not tell you</h3>
-      <p>Registered dates lag real readouts, especially for open-label early-phase programs, so a date here is when a readout can first exist, not when it will land. Private-round valuations, terms, cap tables and private burn are not public and are shown as unknown rather than estimated. Vendor likelihood scores, paid consensus, deal terms and prescription data are out of scope by design: every source on this page is public and free. Nothing here is advice.</p>
+      <h3>Sources, definitions and limits</h3>
+      <p>Every number here comes from a public source and the <a href="#" onclick="Sheet.close();App.setTab('about');return false"><b>Method</b> tab</a> lists each one with its cadence, the join used and the exact query and pull date. How the scores are defined, what a registered date does and does not mean, and where the tool stops are written up once, on the standalone <a href="/method"><b>method page</b></a>. In one line: registered dates lag real readouts, private valuations and terms are shown as unknown rather than estimated, and paid data is out of scope by design.</p>
     </div></section>
   </div>
 </div>
