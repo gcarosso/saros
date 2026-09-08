@@ -84,7 +84,7 @@ const App={tab:'cal',tlMode:'ph',calSort:['pd',1],calPage:0,calDense:0,spN:25,fd
     if(F.wl){const d=x=>v.filter(t=>t.days>=0&&t.days<=x);const kb=[
         ['Catalysts · 7 d',d(7).length,`${d(7).filter(t=>t.impactB==='High').length} high impact`,''],
         ['Catalysts · 30 d',d(30).length,`${d(30).filter(t=>t.ph==='P3').length} Phase 3`,sparkline(byM)],
-        ['Catalysts · 90 d',d(90).length,`${d(90).filter(t=>t.rel==='firm').length} firm dates`,''],
+        ['Catalysts · 90 d',d(90).length,`${d(90).filter(t=>t.rel==='firm').length} actual registry dates`,''],
         ['Unconfirmed ≤ 30 d',d(30).filter(t=>t.rel==='estimated').length,'estimated dates inside a month',''],
         ['Cash binding',v.filter(t=>t.binding).length,`${v.filter(t=>t.cashm!=null&&t.cashm<12).length} names < 12 mo cash`,''],
         ['Specialist adds',v.filter(t=>t.own&&t.own.new>0).length,`${v.filter(t=>t.ins&&t.ins.buy_usd>=250000).length} with insider buying`,''],
@@ -141,12 +141,12 @@ const App={tab:'cal',tlMode:'ph',calSort:['pd',1],calPage:0,calDense:0,spN:25,fd
       <td class="num dim">${Math.round(t.pri*100)}%</td>
       <td><span class="imp ${t.impactB}" title="impact ${t.impact.toFixed(2)} · ${t.rel}">${t.impactB}</span></td>
       <td><span class="act ${t.action.split(' ')[0].toLowerCase().replace('/','')}" title="${esc(t.actionWhy)}">${esc(t.action)}</span></td>
-      <td class="num dim">${t.mcap?fmtUSD(t.mcap):'—'}</td></tr>`).join('')||`<tr><td colspan="16" class="empty">No trials match. Loosen a filter or clear the focus.</td></tr>`;
+      <td class="num dim">${t.mcap?fmtUSD(t.mcap):'—'}</td></tr>`).join('')||`<tr><td colspan="16" class="empty">${F.wl&&!WL.s.size?'Your book is empty. Open a trial and press ★ (or W) to add it; the Book preset then shows only those.':'No trials match. Loosen a filter or clear the focus.'}</td></tr>`;
     bindTips($('#caltbl'));
     $$('#caltbl tbody tr.r').forEach(tr=>{tr.onclick=e=>{if(e.target.dataset.wl)return;Dossier.open(tr.dataset.id);};const t=IDX.get(tr.dataset.id);tr.addEventListener('mouseenter',e=>Tip.show(trialTip(t),e));tr.addEventListener('mousemove',Tip.move);tr.addEventListener('mouseleave',Tip.hide);});
     $$('#caltbl [data-wl]').forEach(b=>b.onclick=e=>{e.stopPropagation();WL.toggle(b.dataset.wl);});
     const np=Math.ceil(rows.length/per);
-    $('#calpager').innerHTML=`<span>${rows.length.toLocaleString()} trials · page ${np?pg+1:0}/${np}</span><span class="sp"></span><button class="btn sm" ${pg===0?'disabled':''} onclick="App.calPage--;App.renderCal()">‹ prev</button><button class="btn sm" ${pg>=np-1?'disabled':''} onclick="App.calPage++;App.renderCal()">next ›</button>`;
+    $('#calpager').innerHTML=`<span>${rows.length.toLocaleString()} trials${np?` · page ${pg+1}/${np}`:''}</span><span class="sp"></span><button class="btn sm" ${pg===0?'disabled':''} onclick="App.calPage--;App.renderCal()">‹ prev</button><button class="btn sm" ${pg>=np-1?'disabled':''} onclick="App.calPage++;App.renderCal()">next ›</button>`;
     $('#cal-title').textContent=(F.month?fmtM(F.month)+' readouts':'Readout calendar')+(F.grp?' · '+F.grp:'')+(F.cell?' · '+F.cell[0]+' '+F.cell[1]:'')+(F.inv?' · held by '+F.inv:'')+(F.moa.size?' · '+[...F.moa].join(' / '):'');
     $('#cal-hint').textContent='Δ days from today · Conf. = readout-confidence heuristic · Prior = literature phase-transition base rate';
   },
@@ -169,7 +169,7 @@ const App={tab:'cal',tlMode:'ph',calSort:['pd',1],calPage:0,calDense:0,spN:25,fd
     const ibuyHtml=ibuy.length?`<div class="sec" style="margin:0 0 14px"><h4>Insider buy clusters <span class="dim2" style="text-transform:none;letter-spacing:0">· ≥2 open-market buys, ≥$250k · ${(INS.quarters||[]).slice().reverse().join('+').toUpperCase()}</span></h4><div class="related">${ibuy.map(e=>`<button onclick="F.q='${esc(e.tk||e.name.split(' ')[0]).toLowerCase().replace(/'/g,"\\'")}';document.getElementById('q').value=F.q;App.update();App.setTab('cal')"><span class="badge" style="width:52px;text-align:center">${esc(e.tk||'—')}</span><span class="ttl">${esc(e.name.toLowerCase().replace(/\b\w/g,c=>c.toUpperCase()))}</span><span class="num" style="color:var(--good)">${fmtUSD(e.buy_usd)}</span><span class="num dim2" style="width:40px;text-align:right">${e.buy_n}×</span></button>`).join('')}</div></div>`:'';
     $('#conc').innerHTML=ibuyHtml+(crowd.length?`<div class="sec" style="margin:0 0 14px"><h4>Specialist crowding <span class="dim2" style="text-transform:none;letter-spacing:0">· issuers held by ≥3 of ${F13.funds.filter(f=>!f.gen).length} specialists · +n = generalists (Point72, Viking, Woodline, Polar, Farallon) · ${(F13.funds[0]||{}).period||''}</span></h4><div class="related">${crowd.map(e=>`<button onclick="F.q='${esc(e.issuer.split(' ')[0].toLowerCase()).replace(/'/g,"\\'")}';document.getElementById('q').value=F.q;App.update();App.setTab('cal')" title="Search trials for this issuer"><span class="num" style="width:22px;color:var(--acc)">${e.n}</span><span class="num dim2" style="width:24px;font-size:10px">${e.ng?'+'+e.ng:''}</span><span class="ttl">${esc(e.issuer.replace(/\b(INC|CORP|LTD|PLC|HOLDINGS?|CO)\b\.?/g,'').trim().toLowerCase().replace(/\b\w/g,c=>c.toUpperCase()))}</span><span class="num dim2">${fmtUSD(e.value)}</span><span class="num" style="width:44px;text-align:right;color:${e.new>e.exit?'var(--good)':e.exit>e.new?'var(--crit)':'var(--ink-3)'}">${e.new?'+'+e.new:''}${e.exit?' −'+e.exit:''}</span></button>`).join('')}</div></div>`:'')+`<div class="kv" style="grid-template-columns:1fr auto"><span class="k">Distinct sponsor groups</span><span class="v num">${all.length}</span><span class="k">Top-5 share</span><span class="v num">${Math.round(top5/tot*100)}%</span><span class="k">Top-20 share</span><span class="v num">${Math.round(top20/tot*100)}%</span><span class="k">HHI (trial count)</span><span class="v num">${Math.round(hhi)}</span><span class="k">Single-trial sponsors</span><span class="v num">${all.filter(r=>r.total===1).length}</span></div>
       <div class="sec"><h4>By tier</h4>${TIER_ORDER.map(k=>`<div class="meter"><span class="k dim" style="font-size:11.5px">${k}</span><span></span><div class="tr"><i style="width:${(tiers.get(k)||0)/tot*100}%;background:${TIER_COLOR[k]}"></i></div><span class="v">${tiers.get(k)||0} · ${Math.round((tiers.get(k)||0)/tot*100)}%</span></div>`).join('')}</div>
-      <div class="sec"><h4>By listing</h4>${['US-listed','Listed ex-US / OTC','Unlisted / private'].map(k=>{const n=base.filter(t=>t.lst===k).length;return `<div class="meter"><span class="k dim" style="font-size:11.5px">${k}</span><span></span><div class="tr"><i style="width:${n/tot*100}%;background:var(--ink-3)"></i></div><span class="v">${n} · ${Math.round(n/tot*100)}%</span></div>`;}).join('')}</div>
+      <div class="sec"><h4>By listing</h4>${['US-listed','Listed ex-US / OTC','Private (known)','No SEC equity match'].map(k=>{const n=base.filter(t=>t.lst===k).length;return `<div class="meter"><span class="k dim" style="font-size:11.5px">${k}</span><span></span><div class="tr"><i style="width:${n/tot*100}%;background:var(--ink-3)"></i></div><span class="v">${n} · ${Math.round(n/tot*100)}%</span></div>`;}).join('')}</div>
       <div class="sec"><h4>Phase 3 leaders</h4><div class="related">${all.filter(r=>r.p3).sort((a,b)=>b.p3-a.p3).slice(0,8).map(r=>`<button onclick="F.grp='${esc(r.key).replace(/'/g,"\\'")}';App.update()"><span class="ttl">${esc(r.name)}</span><span class="num dim2">${r.p3} P3</span></button>`).join('')}</div></div>`;
     $$('#conc .meter').forEach(el=>{el.style.gridTemplateColumns='120px 0 1fr auto';});
     App.renderProgram();
@@ -316,7 +316,7 @@ source        openFDA · GET /drug/drugsfda.json
 search        submissions.submission_status_date:[20250101 TO 20271231] AND submissions.submission_status:AP
 records       ${META.n_fda.toLocaleString()} approval actions across ${new Set(FDA.map(f=>f.app)).size.toLocaleString()} applications
 transport     gzip → base64 in-page payload · DecompressionStream at load
-live mode     ${Live.available===false?'blocked by hosted sandbox':'ClinicalTrials.gov v2 delta on LastUpdatePostDate'}
+live mode     ${Live.available===false?'blocked by this host or network':'ClinicalTrials.gov v2 delta on LastUpdatePostDate'}
 diff          ${DIFF.prev_pulled?`vs snapshot ${DIFF.prev_pulled.slice(0,10)} · ${DIFF.changed} changed · ${DIFF.slipped} slipped · ${DIFF.pulled_in} pulled in · ${DIFF.firmed} firmed · ${DIFF.status} status · ${(DIFF.new||[]).length} new · ${(DIFF.gone||[]).length} gone`:'no previous snapshot'}
 source        SEC EDGAR full-text search · 8-K / 6-K / 10-Q / 10-K · ${REG.rows.length} PDUFA / AdCom / resubmission dates · pulled ${esc(REG.pulled||'—')}
 source        SEC Form D structured data sets · ${FD.quarters?FD.quarters[0]+' → '+FD.quarters[FD.quarters.length-1]:'—'} · ${FD.n_issuers_total||0} bio/pharma issuers · ${Object.keys(FD.issuers||{}).length} matched to sponsors · pulled ${esc(FD.pulled||'—')}
@@ -349,11 +349,11 @@ const Dossier={cur:null,
         <span class="k">Primary endpoint</span><span class="v">${esc(t.po||'—')}${t.pot?` <span class="dim2">[${esc(t.pot)}]</span>`:''}</span></div>
         <div class="meter" data-gl="conf"><div class="tr"><i style="width:${t.conf}%;background:var(--${t.conf>=75?'good':t.conf>=50?'warn':'crit'})"></i></div><span class="v">${t.conf} <span class="dim2">confidence</span></span></div>
         <div style="margin:6px 0 2px">${t.why.map(w=>`<span class="flag ${w[2]}">${w[0]} <b class="num">${w[1]}</b></span>`).join('')||'<span class="dim2">No adjustments from the 55 baseline.</span>'}</div>
-        <div class="meter" data-gl="prior"><div class="tr"><i style="width:${t.pri*100}%;background:var(--ink-3)"></i></div><span class="v">${Math.round(t.pri*100)}% <span class="dim2">base-rate prior · ${t.ph}${t.ta==='Oncology'?' oncology':' non-oncology'}</span></span></div></div>
+        <div class="meter" data-gl="prior"><div class="tr"><i style="width:${t.pri*100}%;background:var(--ink-3)"></i></div><span class="v">${Math.round(t.pri*100)}% <span class="dim2">next-phase transition · ${t.ph}${t.ta==='Oncology'?' oncology':' non-oncology'} · ${Math.round(t.pos*100)}% cumulative to approval</span></span></div></div>
       ${regSection(t)}
       ${ownSection(t)}${insSection(t)}
       <div class="sec"><h4>Design</h4><div class="kv"><span class="k">Enrollment</span><span class="v num">${fmtN(t.n)} <span class="dim2">${t.nt==='ACTUAL'?'actual':'estimated'}</span></span><span class="k">Allocation</span><span class="v">${esc(nice(t.al))}</span><span class="k">Masking</span><span class="v">${esc(nice(t.mk))}</span><span class="k">Model</span><span class="v">${esc(nice(t.im))}</span><span class="k">Purpose</span><span class="v">${esc(nice(t.pp))}</span><span class="k">Footprint</span><span class="v">${t.ns?`${t.ns} sites · ${t.nc} countries · ${esc(t.tc.join(', '))}`:'no sites listed'}</span>
-        ${t.vel?`<span class="k">Enrollment pace</span><span class="v num">${t.vel.toFixed(1)} pts/mo <span class="dim2">over ${Math.round(t.mos)} mo</span>${t.velR!=null?` · <span style="color:${t.velR<0.5?'var(--crit)':t.velR<0.8?'var(--warn)':'var(--good)'}">${t.velR.toFixed(2)}×</span> <span class="dim2">${esc(t.ta)} ${t.ph} median ${(BENCH[t.ta+'|'+t.ph]||{}).vel?.toFixed(1)} (n=${(BENCH[t.ta+'|'+t.ph]||{}).n})</span>`:''}</span>`:''}
+        ${t.vel?`<span class="k" data-gl="vel">Enrollment / month</span><span class="v num">${t.vel.toFixed(1)} pts/mo <span class="dim2">registered n ÷ ${Math.round(t.mos)} mo start→PCD</span>${t.velR!=null?` · <span style="color:${t.velR<0.5?'var(--crit)':t.velR<0.8?'var(--warn)':'var(--good)'}">${t.velR.toFixed(2)}×</span> <span class="dim2">${esc(t.ta)} ${t.ph} median ${(BENCH[t.ta+'|'+t.ph]||{}).vel?.toFixed(1)} (n=${(BENCH[t.ta+'|'+t.ph]||{}).n})</span>`:''}</span>`:''}
         ${t.spp?`<span class="k">Site density</span><span class="v num">${t.spp.toFixed(1)} sites / 100 pts${t.sppR!=null?` <span class="dim2">· ${t.sppR.toFixed(2)}× peer median</span>`:''}</span>`:''}</div></div>
       ${rnpvSection(t)}
       <div class="sec"><h4>Mechanism</h4>
@@ -427,14 +427,16 @@ const Live={available:null,changes:[],
           if(fresh){T.push(t);IDX.set(id,t);add++;}else{upd++;const ch=[];if(before.st!==t.st)ch.push(['status',before.st,t.st]);if(before.pcd!==t.pcd)ch.push(['primary completion',before.pcd,t.pcd]);if(before.n!==t.n)ch.push(['enrollment',before.n,t.n]);if(ch.length)Live.changes.push({id,t:t.t,grp:t.grp,ph:t.ph,ch,wl:WL.has(id)});}}
         tok=j.nextPageToken;n++;}while(tok&&n<10);
       DATA.trials=T;enrich();App.update();Live.available=true;Live.showChanges();
-      $('#freshpill').innerHTML=`<span class="dot"></span><span id="freshtxt">live · ${new Date().toISOString().slice(11,16)}Z</span>`;toast(`Merged ${upd} updated + ${add} new records · ${Live.changes.length} material changes`);
-    }catch(e){Live.available=false;toast('Live refresh blocked here (sandbox or network). Open the local copy for live mode.');console.warn('live refresh failed',e);}
+      $('#freshpill').innerHTML=`<span class="dot"></span><span id="freshtxt">live · ${new Date().toISOString().slice(11,16)}Z</span>`;
+      $('#st-idx').innerHTML=`index <b>${T.length.toLocaleString()}</b> trials · live merge <b>+${add}</b> new / <b>${upd}</b> updated · <b>${FDA.length.toLocaleString()}</b> FDA actions`;
+      $('#st-diff').innerHTML=(DIFF.prev_pulled?`Δ vs ${DIFF.prev_pulled.slice(0,10)} <b>${DIFF.slipped}</b> slipped · <b>${DIFF.firmed}</b> firmed · <b>${(DIFF.new||[]).length}</b> new · `:'')+`live changes <b>${Live.changes.length}</b>`;toast(`Merged ${upd} updated + ${add} new records · ${Live.changes.length} material changes`);
+    }catch(e){Live.available=false;toast('Live refresh blocked here (host sandbox or network). The local copy and saros.gcarosso.bio both refresh.');console.warn('live refresh failed',e);}
     b.disabled=false;b.textContent='↻ Refresh live';}
 };
 
 /* ---------- rNPV mini-model ---------- */
 function rnpvSection(t){
-  const pos=Math.round(t.pri*100);
+  const pos=Math.round(t.pos*100);
   const launch=+t.pcd.slice(0,4)+(t.ph==='P3'||t.ph==='P2/P3'?1:t.ph==='P2'?3:5);
   const sh=(t.sec&&t.sec.sh)||null;
   return `<div class="sec"><h4 data-gl="rnpv">rNPV sketch <span class="dim2" style="text-transform:none;letter-spacing:0">· your inputs, nothing here is a forecast</span></h4>
@@ -444,7 +446,7 @@ function rnpvSection(t){
       <span class="k">Years to peak</span><span class="v"><input data-k="ramp" type="number" value="5" step="1" style="width:90px"></span>
       <span class="k">Exclusivity, yrs</span><span class="v"><input data-k="excl" type="number" value="10" step="1" style="width:90px"> <span class="dim2">then 80% erosion over 3 yrs</span></span>
       <span class="k">Contribution margin</span><span class="v"><input data-k="margin" type="number" value="55" step="5" style="width:90px"> %</span>
-      <span class="k">PoS to approval</span><span class="v"><input data-k="pos" type="number" value="${pos}" step="5" style="width:90px"> % <span class="dim2">pre-filled from the literature prior</span></span>
+      <span class="k">PoS to approval</span><span class="v"><input data-k="pos" type="number" value="${pos}" step="5" style="width:90px"> % <span class="dim2">cumulative literature prior from ${t.ph} (product of phase-transition rates), not the single-step prior; set your own</span></span>
       <span class="k">Discount rate</span><span class="v"><input data-k="r" type="number" value="10" step="1" style="width:90px"> %</span>
       <span class="k">Cost to complete, $M</span><span class="v"><input data-k="cost" type="number" value="${t.ph==='P3'?150:t.ph==='P2'?250:350}" step="25" style="width:90px"> <span class="dim2">unrisked, spent before launch</span></span>
     </div>
@@ -541,7 +543,8 @@ function secRow(sec,nTrials){
   if(!sec||sec.t==='private')return `<span class="k">Listing</span><span class="v dim">unlisted / private</span>`;
   const rw=runway(sec);let out=`<span class="k">Listing</span><span class="v"><span class="badge">${esc(sec.t)}</span> <span class="dim2">${esc(sec.ex||'')}</span></span>`;
   if(rw&&rw.cash){out+=`<span class="k">Cash + ST inv.</span><span class="v num">${fmtUSD(rw.cash)} <span class="dim2">${sec.per?sec.per.replace('CY','').replace('I',''):''}</span></span>`;
-    if(rw.burn>0)out+=`<span class="k">Burn-implied runway</span><span class="v num">${rw.yrs>=10?'>10':rw.yrs.toFixed(1)} yrs <span class="dim2">at ${fmtUSD(rw.burn)}/yr net loss</span></span>`;
+    if(rw.burn>0)out+=`<span class="k">Burn-implied runway</span><span class="v num">${rw.yrs>=10?'>10':rw.yrs.toFixed(1)} yrs <span class="dim2">at ${fmtUSD(rw.burn)}/yr ${rw.basis==='ocf'?'operating cash outflow (FY2025 cash-flow statement)':'net loss (accounting proxy; no cash-flow figure reported)'}</span></span>`;
+    else if(rw.basis==='ocf')out+=`<span class="k">Burn-implied runway</span><span class="v">n/a <span class="dim2">operating cash flow positive (FY2025)</span></span>`;
     else if(sec.ni!=null)out+=`<span class="k">Net income FY25</span><span class="v num">${fmtUSD(sec.ni)}</span>`;}
   if(sec.rd!=null){out+=`<span class="k">R&D FY25</span><span class="v num">${fmtUSD(sec.rd)}${nTrials?` <span class="dim2">· ${fmtUSD(sec.rd/nTrials)} per trial in window</span>`:''}</span>`;}
   else if(sec.rdq&&sec.rdq.some(x=>x!=null)){const q=sec.rdq.filter(x=>x!=null);const rr=q.reduce((a,b)=>a+b,0)/q.length*4;out+=`<span class="k">R&D run-rate</span><span class="v num">${fmtUSD(rr)}/yr${nTrials?` <span class="dim2">· ${fmtUSD(rr/nTrials)} per trial</span>`:''}</span>`;}

@@ -4,7 +4,7 @@ import gzip,json,re,collections,datetime,os
 OUT=os.path.dirname(os.path.abspath(__file__))
 d=json.load(gzip.open(os.path.join(OUT,"ct_raw.json.gz"),"rt"))
 TA=[("Oncology",r"cancer|carcinoma|tumou?r|neoplasm|lymphoma|leukemia|leukaemia|myeloma|melanoma|sarcoma|glioma|glioblastoma|nsclc|sclc|metasta|oncolog|mesothelioma|myelodysplastic|myelofibrosis|blastoma|adenocarcinoma"),
-("Nephrology & Urology",r"nephropathy|glomerul|\biga\b|igan\b|fsgs|lupus nephritis|nephrotic|alport|polycystic kidney|adpkd|nephro|overactive bladder|incontinence|urolog"),
+("Nephrology & Urology",r"nephropathy|glomerul|\biga\b|\bigan\b|fsgs|lupus nephritis|nephrotic|alport|polycystic kidney|adpkd|nephro|overactive bladder|incontinence|urolog"),
 ("Cardiometabolic",r"diabet|obes|weight|cardio|heart failure|atrial|hypertens|coronary|myocardial|lipid|cholesterol|hypercholes|nash|mash|steatohepat|steatotic|kidney disease|ckd|renal|lp\(a\)|atheroscl|stroke|thromb|hypertriglycer"),
 ("Immunology & Inflammation",r"psoria|arthritis|lupus|crohn|colitis|dermatitis|atopic|asthma|copd|eosinophil|hidradenitis|alopecia|vitiligo|spondyl|sjogren|scleroderma|myasthenia|urticaria|inflammat|pemphig|uveitis|sarcoidosis|immune|autoimmun|celiac|prurigo|lichen"),
 ("Neuroscience",r"alzheimer|parkinson|schizophren|depress|bipolar|epilep|seizure|migraine|multiple sclerosis|neuropath|huntington|amyotrophic|als\b|dementia|cognitive|autism|adhd|anxiety|insomnia|narcolepsy|pain\b|tourette|ataxia|myotonic|duchenne|spinal muscular|neuro|psychiatr|ptsd|agitation|tardive|essential tremor|rett"),
@@ -43,7 +43,7 @@ def modality(text,types):
         if re.search(rx,t): return name
     ty=set(types)
     if "BIOLOGICAL" in ty: return "Biologic (unspecified)"
-    if "DRUG" in ty: return "Small molecule"
+    if "DRUG" in ty: return "Drug (unclassified)"   # registry type only; not evidence of a small molecule
     if "DEVICE" in ty: return "Device / combination"
     if "PROCEDURE" in ty or "RADIATION" in ty: return "Procedure / radiation"
     if "BEHAVIORAL" in ty or "DIETARY_SUPPLEMENT" in ty: return "Other"
@@ -74,7 +74,7 @@ for t in rows:
     txt=" ".join([t["t"],t["ot"]," ".join(t["c"])," ".join(t["k"])," ".join(n for _,n in t["iv"])," ".join(t["ivd"]),t["sum"]])
     t["moa"],t["mn"]=moa_lexicon.tag(txt," ".join(n for _,n in t["iv"])+" "+t["t"])
     mo=set(t["moa"])
-    if t["mo"] in ("Biologic (unspecified)","Small molecule","Other","Monoclonal antibody","Peptide / protein / enzyme"):
+    if t["mo"] in ("Biologic (unspecified)","Drug (unclassified)","Small molecule","Other","Monoclonal antibody","Peptide / protein / enzyme"):
         if mo&{"Gene / epigenetic editing","AAV gene therapy"}: t["mo"]="Gene therapy / editing"
         elif mo&{"siRNA","Antisense oligonucleotide","SOD1 ASO","FUS ASO","Angiotensinogen siRNA"}: t["mo"]="Oligonucleotide (siRNA/ASO)"
         elif mo&{"CAR-T","TCR-T","TIL cell therapy","NK cell therapy","CD19 CAR-T (autoimmune)"}: t["mo"]="Cell therapy"
@@ -94,18 +94,21 @@ try:
     sec=json.load(open(os.path.join(OUT,"sec_raw.json")))
     spn={norm(t["sp"]) for t in rows}
     fin=sec["fin"]
+    def rank_tk(tk): return (0 if tk["ex"] in ("Nasdaq","NYSE") else 1, 1 if re.search(r"[-.]",tk["t"]) else 0, len(tk["t"]))   # common share first, never a CVR / right (BMY, not CELG-RI)
+    best={}
     for tk in sec["tickers"]:
         nn=norm(tk["n"])
-        if nn in spn and (nn not in SEC or tk["ex"] in ("Nasdaq","NYSE")):
-            f=fin.get(str(tk["cik"]),{})
-            SEC[nn]={"t":tk["t"],"ex":tk["ex"],"cik":tk["cik"],"cash":f.get("cash"),"sti":f.get("sti"),"per":f.get("cash_per",""),"rd":f.get("rd"),"ni":f.get("ni"),"rev":f.get("rev"),"rdq":[f.get("rd_q1"),f.get("rd_q2")],"niq":[f.get("ni_q1"),f.get("ni_q2")],"flt":f.get("float"),"fltper":f.get("float_per",""),"sh":f.get("sh")}
+        if nn in spn and (nn not in best or rank_tk(tk)<rank_tk(best[nn])): best[nn]=tk
+    for nn,tk in best.items():
+        f=fin.get(str(tk["cik"]),{})
+        SEC[nn]={"t":tk["t"],"ex":tk["ex"],"cik":tk["cik"],"cash":f.get("cash"),"sti":f.get("sti"),"per":f.get("cash_per",""),"rd":f.get("rd"),"ni":f.get("ni"),"rev":f.get("rev"),"ocf":f.get("ocf"),"rdq":[f.get("rd_q1"),f.get("rd_q2")],"niq":[f.get("ni_q1"),f.get("ni_q2")],"flt":f.get("float"),"fltper":f.get("float_per",""),"sh":f.get("sh")}
     # manual map for groups (ticker, exchange, cik or None)
     MAN={"AstraZeneca":("AZN","Nasdaq"),"Lilly":("LLY","NYSE"),"Roche":("RHHBY","OTC"),"AbbVie":("ABBV","NYSE"),"Novartis":("NVS","NYSE"),"Sanofi":("SNY","Nasdaq"),"Pfizer":("PFE","NYSE"),"Merck & Co.":("MRK","NYSE"),"Amgen":("AMGN","Nasdaq"),"Johnson & Johnson":("JNJ","NYSE"),"GSK":("GSK","NYSE"),"Novo Nordisk":("NVO","NYSE"),"Takeda":("TAK","NYSE"),"Bristol Myers Squibb":("BMY","NYSE"),"Gilead":("GILD","Nasdaq"),"Boehringer Ingelheim":("private",""),"Bayer":("BAYRY","OTC"),"Regeneron":("REGN","Nasdaq"),"Vertex":("VRTX","Nasdaq"),"Biogen":("BIIB","Nasdaq"),"Astellas":("ALPMY","OTC"),"Daiichi Sankyo":("DSNKY","OTC"),"Eisai":("ESALY","OTC"),"Merck KGaA":("MKKGY","OTC"),"UCB":("UCBJY","OTC"),"Moderna":("MRNA","Nasdaq"),"BioNTech":("BNTX","Nasdaq"),"Otsuka":("OTSKY","OTC"),"Teva":("TEVA","NYSE"),"Alnylam":("ALNY","Nasdaq"),"Servier":("private",""),"Ipsen":("IPSEY","OTC"),"Jazz":("JAZZ","Nasdaq"),"Incyte":("INCY","Nasdaq"),"argenx":("ARGX","Nasdaq"),"Lundbeck":("HLUYY","OTC"),"BeiGene / BeOne":("ONC","Nasdaq"),"Hengrui":("600276","SSE"),"Qilu":("private",""),"Innovent":("1801","HKEX"),"Akeso":("9926","HKEX"),"Hansoh":("3692","HKEX"),"CTTQ":("1177","HKEX"),"Baili / SystImmune":("688506","SSE"),"Junshi":("1877","HKEX"),"Zai Lab":("ZLAB","Nasdaq"),"Kelun":("6990","HKEX"),"HUTCHMED":("HCM","Nasdaq"),"CSPC":("1093","HKEX"),"Sino Biopharm":("1177","HKEX"),"RemeGen":("9995","HKEX"),"Henlius":("2696","HKEX"),"Duality Bio":("9606","HKEX"),"Gan & Lee":("603087","SSE"),"Celltrion":("068270","KRX"),"Samsung Bioepis":("private",""),"Hanmi":("128940","KRX"),"Shionogi":("SGIOY","OTC"),"Kyowa Kirin":("KYKOF","OTC"),"Sumitomo Pharma":("DSPHF","OTC"),"Ono":("OPHLY","OTC"),"Mitsubishi Tanabe":("private",""),"Ascendis":("ASND","Nasdaq"),"Neurocrine":("NBIX","Nasdaq"),"Ionis":("IONS","Nasdaq"),"Sarepta":("SRPT","Nasdaq"),"BioMarin":("BMRN","Nasdaq"),"Insmed":("INSM","Nasdaq"),"Madrigal":("MDGL","Nasdaq"),"Viking":("VKTX","Nasdaq"),"Structure":("GPCR","Nasdaq"),"Revolution Medicines":("RVMD","Nasdaq"),"Summit":("SMMT","Nasdaq"),"Immunocore":("IMCR","Nasdaq"),"Roivant":("ROIV","Nasdaq"),"Intra-Cellular":("JNJ","NYSE"),"Apellis":("APLS","Nasdaq"),"Cytokinetics":("CYTK","Nasdaq"),"Nuvalent":("NUVL","Nasdaq"),"Arvinas":("ARVN","Nasdaq"),"Iovance":("IOVA","Nasdaq"),"Legend":("LEGN","Nasdaq"),"CRISPR Tx":("CRSP","Nasdaq"),"Intellia":("NTLA","Nasdaq"),"Beam":("BEAM","Nasdaq"),"Verve":("LLY","NYSE"),"Abbott":("ABT","NYSE"),"Colgate-Palmolive":("CL","NYSE"),"P&G":("PG","NYSE")}
     tkidx={tk["t"]:tk for tk in sec["tickers"]}
     MANOUT={}
     for g,(t,ex) in MAN.items():
         tk=tkidx.get(t); f=fin.get(str(tk["cik"]),{}) if tk else {}
-        MANOUT[g]={"t":t,"ex":ex or (tk["ex"] if tk else ""),"cik":tk["cik"] if tk else None,"cash":f.get("cash"),"sti":f.get("sti"),"per":f.get("cash_per",""),"rd":f.get("rd"),"ni":f.get("ni"),"rev":f.get("rev"),"rdq":[f.get("rd_q1"),f.get("rd_q2")],"niq":[f.get("ni_q1"),f.get("ni_q2")],"flt":f.get("float"),"fltper":f.get("float_per",""),"sh":f.get("sh")}
+        MANOUT[g]={"t":t,"ex":ex or (tk["ex"] if tk else ""),"cik":tk["cik"] if tk else None,"cash":f.get("cash"),"sti":f.get("sti"),"per":f.get("cash_per",""),"rd":f.get("rd"),"ni":f.get("ni"),"rev":f.get("rev"),"ocf":f.get("ocf"),"rdq":[f.get("rd_q1"),f.get("rd_q2")],"niq":[f.get("ni_q1"),f.get("ni_q2")],"flt":f.get("float"),"fltper":f.get("float_per",""),"sh":f.get("sh")}
     print("sec matched sponsors",len(SEC),"manual",len(MANOUT),"pulled",sec["pulled"])
 except Exception as e:
     print("SEC join skipped:",e); MANOUT={}
@@ -206,7 +209,7 @@ LV=[]
 for r in csv.DictReader(open(os.path.join(OUT,"..","longevity_funding_2026-07.csv"),encoding="utf-8-sig")):
     LV.append({"rank":int(r["rank"]),"co":r["company"],"what":r["what_they_do"],"raised":float(r["total_raised_usd_m"] or 0),"rounds":r["total_rounds"],"last":r["last_round_date"],"lastamt":r["last_round_amount_usd_m"],"lasttype":r["last_round_type"],"inv":r["key_investors"],"stage":r["current_stage"],"conf":r["confidence"],"nct":[]})
 def stem(n): return re.sub(r"\b(labs?|biosciences?|bio|biotechnology|biotechnologies|therapeutics|pharmaceuticals?|medicine|life sciences|health|sciences?|inc\.?|ltd\.?)\b","",n.lower()).strip()
-AG=re.compile(r"aging|ageing|senolytic|senescen|longevity|healthspan|lifespan|sarcopenia|frailty|rapamycin|mtor|nad\+|nicotinamide|klotho|gdf11|telomer|epigenetic reprogram|partial reprogram|geroprotect|geroscience|age-related|autophagy|mitochondrial dysfunction|progeria|werner|plasma exchange|young plasma|metformin",re.I)
+AG=re.compile(r"\b(?:aging|ageing)\b|senolytic|senescen|longevity|healthspan|lifespan|sarcopenia|frailty|rapamycin|mtor|nad\+|nicotinamide|klotho|gdf11|telomer|epigenetic reprogram|partial reprogram|geroprotect|geroscience|age-related|autophagy|mitochondrial dysfunction|progeria|werner|plasma exchange|young plasma|metformin",re.I)
 for t in rows:
     t["ag"]=1 if AG.search(t["t"]+" "+t["ot"]+" "+" ".join(t["c"])+" "+" ".join(t["k"])+" "+t["sum"]) else 0
     t["lv"]=""

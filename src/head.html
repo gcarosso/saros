@@ -126,10 +126,11 @@ button:focus-visible,input:focus-visible,select:focus-visible,[tabindex]:focus-v
 .panel>.ph{display:flex;align-items:center;gap:10px;padding:9px 12px;border-bottom:1px solid var(--line)}
 .panel>.ph h2{font-size:12.5px;font-weight:600;margin:0;letter-spacing:.01em}
 .panel>.ph .hint{font-size:12px;color:var(--ink-3)}
-.panel>.ph .tools{margin-left:auto;display:flex;gap:6px;align-items:center}
+.panel>.ph .tools{margin-left:auto;display:flex;gap:6px;align-items:center;flex:none}
+.panel>.ph .hint{min-width:0}
 .panel>.pb{padding:10px 12px}
 .seg{display:inline-flex;border:1px solid var(--line);border-radius:6px;overflow:hidden;background:var(--g2)}
-.seg button{height:24px;padding:0 9px;font-size:12px;color:var(--ink-2);border-right:1px solid var(--line)}
+.seg button{height:24px;padding:0 9px;font-size:12px;color:var(--ink-2);border-right:1px solid var(--line);white-space:nowrap}
 .seg button:last-child{border-right:0}
 .seg button.on{background:var(--g4);color:var(--ink)}
 
@@ -210,6 +211,13 @@ table.t td.num,table.t th.num{text-align:right;font-family:var(--mono)}
 .heat .rl{font-size:12.5px;color:var(--ink-2);display:flex;align-items:center;justify-content:flex-end;padding-right:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .grid3{display:grid;grid-template-columns:2fr 1fr;gap:12px}
+/* the header must never be wider than the viewport: a grid track sizes to its min-content, so an unshrinkable header would push the whole app past the right edge (seen at 1280: document 1466 px) */
+#app>*{min-width:0}
+@media (max-width:1400px){#brand .sub{display:none}#search{min-width:150px}#top,#topright{gap:6px}#freshtxt{display:none}.btn,.toplink{padding:0 8px}}
+@media (max-width:1150px){#search{min-width:110px}#search kbd{display:none}#top .seg button,.toplink{padding:0 6px;font-size:12px}#brand{margin-right:0}#brand .name{font-size:16px}}
+@media (max-width:1100px){.tabs{overflow-x:auto;scrollbar-width:thin}.tab{flex:none}}
+@media (max-width:820px){#exportbtn{display:none}#search{min-width:80px}#wlbtn .num{display:none}}
+@media (max-width:1000px){#freshpill{display:none}#toplinks{gap:0}.toplink{padding:0 5px;font-size:11.5px}#refreshbtn,#exportbtn,#wlbtn{padding:0 6px;font-size:11.5px}}
 @media (max-width:1250px){.grid2,.grid3{grid-template-columns:1fr}.kpis{grid-template-columns:repeat(3,1fr)}}
 @media (max-width:900px){#main{grid-template-columns:1fr}#rail{display:none}.kpis{grid-template-columns:repeat(2,1fr)}}
 

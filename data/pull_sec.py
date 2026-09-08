@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Pull SEC company tickers + XBRL frames (cash, R&D, net loss, revenue) for the ticker/financials join. Run on a machine with internet."""
+"""Pull SEC company tickers + XBRL frames (cash, R&D, net loss, operating cash flow, revenue) for the ticker/financials join. Run on a machine with internet."""
 import json,urllib.request,time,sys,os,gzip
 CONTACT=__import__("os").environ.get("SAROS_CONTACT","saros@gcarosso.bio")  # SEC and NIH ask for a contact address in the User-Agent
 OUT=os.path.dirname(os.path.abspath(__file__))
@@ -38,6 +38,7 @@ for per in ["CY2026Q2I","CY2026Q1I","CY2025Q4I"]:
 # annual FY2025 flows
 for c in ["ResearchAndDevelopmentExpense"]: frame(c,"CY2025","rd")
 for c in ["NetIncomeLoss"]: frame(c,"CY2025","ni")
+for c in ["NetCashProvidedByUsedInOperatingActivities"]: frame(c,"CY2025","ocf")   # burn basis: cash actually used in operations, not accounting loss
 for c in ["Revenues","RevenueFromContractWithCustomerExcludingAssessedTax"]: frame(c,"CY2025","rev")
 # last two quarters R&D for run-rate
 for per,k in [("CY2026Q2","rd_q2"),("CY2026Q1","rd_q1")]: frame("ResearchAndDevelopmentExpense",per,k)

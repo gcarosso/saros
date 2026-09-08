@@ -41,6 +41,10 @@ PDUFA_RX = re.compile(r"PDUFA|target action date|Prescription Drug User Fee Act|
 ADCOM_RX = re.compile(r"advisory committee", re.I)
 RESUB_RX = re.compile(r"resubmi", re.I)
 CRL_RX = re.compile(r"complete response letter|\bCRL\b", re.I)
+TRADING_RX = re.compile(r"10b5-1|trading arrangement|trading plan", re.I)   # Item 9B/5 tables: "Action Date" is not a PDUFA date
+REAUTH_RX = re.compile(r"re-?authoriz|user fee programs|continuing resolution|government shutdown|appropriations|inducement warrants|exercise price", re.I)   # PDUFA-the-statute and warrant terms, not a drug's date
+TAIL_RX = re.compile(r"[.;•]\s|\s[-–—]\s")
+INN_RX = re.compile(r"\b([a-z]{3,}(?:mab|nib|tide|ciclib|rasib|lisib|parib|tinib|siran|rsen|lutide|glutide|fovir|navir|previr|buvir|asvir|tecan|dotin|domide|bart|bant|kinra|sartan|gliptin|gliflozin|xaban|lukast|prazole))\b")
 PRIO_RX = re.compile(r"priority review", re.I)
 DRUG_RX = re.compile(r"\b([A-Z][a-z]+(?:mab|nib|tide|ciclib|rasib|lisib|stat|parib|zumab|ximab|tinib|gene|cel|vec|siran|rsen|lutide|glutide|pressin|fovir|navir|previr|buvir|asvir|mycin|cillin|oxacin|azole|tecan|dotin|vedotin)|[A-Z]{2,6}-?\d{2,5}[A-Z]?|[A-Z][A-Za-z]{3,}\s?\((?:[a-z]+-?)+\))\b")
 APP_RX = re.compile(r"\b(?:s?NDA|s?BLA|MAA|application|submission)\s+(?:for|of)\s+((?:[A-Za-z0-9®\-]+\s?){1,4})", re.I)
@@ -121,6 +125,7 @@ STOP_RX = re.compile(r"\s+(in|for|to|as|with|under|and|or|that|which|is|was|has|
 
 def classify(sent):
     """Kind for one date mention from its own sentence; None when it is not a regulatory date."""
+    if TRADING_RX.search(sent) or REAUTH_RX.search(sent): return None
     if CRL_RX.search(sent) and not PDUFA_RX.search(sent) and not RESUB_RX.search(sent): return None
     if ADCOM_RX.search(sent) and not PDUFA_RX.search(sent): return "adcom"
     if PDUFA_RX.search(sent): return "pdufa"
@@ -137,22 +142,68 @@ def asset_of(sent):
     if m and not re.match(r"^(%s|The|FDA|NDA|BLA|PDUFA|Priority|Prescription|Advisory|Committee|Company|Phase|Fast|Breakthrough|Orphan|Drug|User|Fee|Act|Q[1-4]|First|Second|Third|Fourth|Health|Human|Services|Food|Administration|Standard|Review)$" % MONTHS, m.group(1)): return m.group(1)[:60]
     for m in DRUG_RX.finditer(sent):
         if not re.match(r"^(EX|ITEM|FORM|NASDAQ|NYSE|CIK|SEC|FDA|CFR|USC)-?\d*$", m.group(1), re.I): return m.group(1)[:60]
+    m = INN_RX.search(sent)   # lower-case INN as a last resort (bezuclastinib, mezigdomide)
+    if m: return m.group(1)[:60]
     return ""
+
+
+def clause_of(sentence, date_iso):
+    """The part of a sentence that belongs to one day-precision date: from the end of the previous date mention to the
+    start of the next. A flattened filing table can put several assets and dates in one 'sentence'; the asset for a
+    date is only looked for inside its own clause. Returns '' when the date is not in the sentence."""
+    ds = list(DATE_RX.finditer(sentence))
+    if not ds: return sentence
+    for k, d in enumerate(ds):
+        try: iso = datetime.date(int(d.group(3)), MON_N[d.group(1).lower()], int(d.group(2))).isoformat()
+        except ValueError: continue
+        if iso == date_iso:
+            if len(ds) == 1: return sentence
+            return _clause(sentence, ds, k)
+    return ""
+
+
+def _clause(sent, ds, k):
+    """Text owned by date k: from the end of date k-1 to the end of date k, plus what follows up to the first clause
+    boundary (. ; • or a spaced dash), capped so it never reaches into the next date's clause. The asset usually
+    precedes its date; the tail catches 'PDUFA date of March 11, 2027 for Reblozyl'."""
+    lo = ds[k - 1].end() if k else 0; nxt = ds[k + 1].start() if k + 1 < len(ds) else len(sent)
+    tail = sent[ds[k].end():nxt]; m = TAIL_RX.search(tail)
+    hi = ds[k].end() + (m.start() if m else min(len(tail), 120))
+    return sent[lo:hi].strip()
+
+
+def lookback(sents, i, limit=600):
+    """Up to two preceding sentences that carry no date of their own — where a table row names the asset before the
+    sentence that states the date ('Reblozyl ... The FDA granted a PDUFA date of March 11, 2027')."""
+    out = []
+    for j in (i - 1, i - 2):
+        if j < 0: break
+        s = sents[j].strip()
+        if DATE_RX.search(s) or QTR_RX.search(s) or HALF_RX.search(s) or TRADING_RX.search(s): break
+        out.insert(0, s)
+        if sum(len(x) for x in out) > limit: break
+    return " ".join(out)[-limit:]
 
 
 def extract(text):
     """Every future regulatory date mentioned in a document: one candidate per date mention, classified from its own sentence."""
     out = []
-    for sent in SENT_RX.split(text):
+    sents = SENT_RX.split(text)
+    for i, sent in enumerate(sents):
         if len(sent) > 1200 or not re.search(r"20\d{2}", sent): continue
         kind = classify(sent)
         if not kind: continue
         s = sent.strip()[:420]; pr = bool(PRIO_RX.search(sent)); asset = asset_of(sent)
         found = False
-        for d in DATE_RX.finditer(sent):
+        dates = list(DATE_RX.finditer(sent))
+        for k, d in enumerate(dates):
             try: dt = datetime.date(int(d.group(3)), MON_N[d.group(1).lower()], int(d.group(2)))
             except ValueError: continue
-            out.append({"kind": kind, "date": dt.isoformat(), "precision": "day", "priority": pr, "asset": asset, "sentence": s}); found = True
+            clause = _clause(sent, dates, k) if len(dates) > 1 else sent.strip(); a = asset_of(clause); ctx = ""
+            if not a and k == 0:
+                ctx = lookback(sents, i); a = asset_of(ctx)
+            out.append({"kind": kind, "date": dt.isoformat(), "precision": "day", "priority": pr, "asset": a, "sentence": s,
+                        "clause": clause[:420], "ctx": ctx}); found = True
         if found: continue
         for q in QTR_RX.finditer(sent):
             qn = {"first": 1, "1q": 1, "q1": 1, "second": 2, "2q": 2, "q2": 2, "third": 3, "3q": 3, "q3": 3, "fourth": 4, "4q": 4, "q4": 4}[q.group(1).lower()]
@@ -172,9 +223,14 @@ def load_tickers():
     p = os.path.join(OUT, "sec_raw.json")
     if not os.path.exists(p): return {}
     j = json.load(open(p)); m = {}
-    for t in j["tickers"]:
-        if t["cik"] not in m or t["ex"] in ("Nasdaq", "NYSE"): m[t["cik"]] = t
+    for t in j["tickers"]:   # one security per CIK: a primary-exchange common share, never a CVR / right / warrant (BMY, not CELG-RI)
+        cur = m.get(t["cik"])
+        if cur is None or rank_ticker(t) < rank_ticker(cur): m[t["cik"]] = t
     return m
+
+
+def rank_ticker(t):
+    return (0 if t.get("ex") in ("Nasdaq", "NYSE") else 1, 1 if re.search(r"[-.]", t["t"]) else 0, len(t["t"]))
 
 
 def supersede(rows):
@@ -213,11 +269,19 @@ def finalize(rows, today):
         keep, drop = (r, m) if r.get("filed", "") > m.get("filed", "") else (m, r)
         keep["sentences"] = [x for x in dict.fromkeys(keep["sentences"] + drop["sentences"])][:4]
         keep["history"] = (keep.get("history") or []) + [h for h in (drop.get("history") or []) if h not in (keep.get("history") or [])]
+        for f in ("clause", "ctx"):
+            if not keep.get(f) and drop.get(f): keep[f] = drop[f]
         merged[k] = keep
     rows = list(merged.values())
-    for r in rows:   # the asset is whichever of the kept sentences names one
-        r["asset"] = next((a for a in (asset_of(x) for x in r["sentences"]) if a), "")
-        r["sentence"] = next((x for x in r["sentences"] if asset_of(x)), r["sentences"][0] if r["sentences"] else "")
+    rows = [r for r in rows if not (TRADING_RX.search(" ".join(r["sentences"])) or REAUTH_RX.search(" ".join(r["sentences"])))]
+    tick = load_tickers()
+    for r in rows:   # the asset comes from the date's own clause; a sentence that also states other dates is not trusted whole
+        day = r["precision"] == "day"
+        cands = ([r["clause"]] if r.get("clause") else []) + [(clause_of(x, r["date"]) if day else x) for x in r["sentences"]] + ([r["ctx"]] if r.get("ctx") else [])
+        r["asset"] = next((a for a in (asset_of(x) for x in cands if x) if a), "")
+        r["sentence"] = next((x for x in r["sentences"] if asset_of(clause_of(x, r["date"]) if day else x)), r["sentences"][0] if r["sentences"] else "")
+        t = tick.get(r.get("cik"))
+        if t: r["ticker"] = t["t"]   # common-stock listing for the CIK, never a CVR / right
     for r in rows:
         age = (today - datetime.date.fromisoformat(r["filed"])).days if r.get("filed") else 999
         r["confidence"] = "firm" if (r["precision"] == "day" and age <= 180) else "guided"
@@ -235,8 +299,19 @@ def main():
     a = ap.parse_args()
     today = datetime.date.today()
     if a.refinalize:
-        p = os.path.join(OUT, "pdufa_edgar.json"); j = json.load(open(p)); j["rows"] = finalize(j["rows"], today)
-        json.dump(j, open(p, "w"), indent=1); print(f"refinalized · {len(j['rows'])} rows"); return
+        p = os.path.join(OUT, "pdufa_edgar.json"); j = json.load(open(p)); rows = j["rows"]
+        # rows whose sentence states several dates were extracted before clauses existed: re-read those filings
+        multi = [r for r in rows if len(list(DATE_RX.finditer(r.get("sentence", "")))) > 1]
+        fresh = {}
+        for url in {r["source"] for r in multi}:
+            try: fresh[url] = extract(text_of(url)); time.sleep(0.12)
+            except Exception as e: log("re-extract failed", url, e)
+        for r in multi:
+            c = next((c for c in fresh.get(r["source"], []) if c["kind"] == r["kind"] and c["date"] == r["date"]), None)
+            if c: r.update({k: c[k] for k in ("asset", "sentence", "clause", "ctx")}); r["sentences"] = [c["sentence"]]
+            else: r["_drop"] = True   # no longer extracted from its own filing (e.g. a 10b5-1 table)
+        j["rows"] = finalize([r for r in rows if not r.get("_drop")], today)
+        json.dump(j, open(p, "w"), indent=1); print(f"refinalized · {len(j['rows'])} rows · {len(multi)} re-read"); return
     days = a.days or (21 if a.incremental else 730)
     start = today - datetime.timedelta(days=days)
     path = os.path.join(OUT, "pdufa_edgar.json")

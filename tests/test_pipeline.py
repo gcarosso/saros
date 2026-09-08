@@ -27,3 +27,18 @@ def test_build_sources_parse():
     import subprocess
     for f in ("src/app1.js", "src/app2.js"):
         subprocess.run(["node", "-e", f"new Function(require('fs').readFileSync('{f}','utf8'))"], check=True, cwd=os.path.join(HERE, ".."))
+
+def _rx(name):
+    src = open(os.path.join(HERE, "..", "data", "process.py"), encoding="utf-8").read()
+    m = re.search(name + r'=re\.compile\(r"(.*?)",re\.I\)', src); assert m, name
+    return re.compile(m.group(1), re.I)
+
+def test_aging_flag_is_word_bounded():
+    ag = _rx("AG")
+    assert ag.search("A study of healthy aging and frailty") and ag.search("anti-ageing intervention")
+    assert not ag.search("PET imaging of glioma") and not ag.search("clinical staging of NSCLC")
+
+def test_igan_does_not_match_michigan():
+    src = open(os.path.join(HERE, "..", "data", "process.py"), encoding="utf-8").read()
+    rx = re.compile(re.search(r'\("Nephrology & Urology",r"(.*?)"\)', src).group(1), re.I)
+    assert rx.search("IgAN") and rx.search("IgA nephropathy") and not rx.search("University of Michigan intracranial aneurysm")

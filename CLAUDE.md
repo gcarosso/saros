@@ -55,6 +55,15 @@ confidence and a `history` of earlier statements (supersession by filer + kind +
 Nothing subscription-derived remains in the build; the old subscription data was moved out of the repo.
 Scope, measured scores and limits: `docs/pdufa-rebuild-scope.md`.
 
+## Audit fixes (2026-09-08, from the gpt-astra brand-and-site audit)
+- Regulatory calendar: each date takes its asset from its own clause (`clause_of` / `_clause` in pull_pdufa.py), with a look-back to the preceding date-free sentences for table rows; rows carry `clause` and `ctx`. 10b5-1 trading-plan tables and PDUFA-reauthorisation / warrant boilerplate are excluded (`TRADING_RX`, `REAUTH_RX`). `--refinalize` re-reads filings whose sentence states several dates (no full pull needed). Tickers per CIK prefer the primary-exchange common share (`rank_ticker`: BMY, never CELG-RI); process.py's SEC join does the same.
+- Runway: pull_sec.py adds FY2025 `NetCashProvidedByUsedInOperatingActivities` (`ocf`); `runway()` uses it (basis `ocf`) and only falls back to the annualised net loss (basis `niq`/`ni`, labelled "accounting proxy" in the dossier). `decide()` treats a sponsor as unconstrained only when reported OCF (else NI) is positive — revenue > $1B no longer counts. No burn data → runway null, not ∞.
+- Priors: `t.pri` stays the single next-step transition; `t.pos = approvalPrior(t)` is the cumulative probability of approval from the current phase and pre-fills the rNPV "PoS to approval" field.
+- Classification: `AG` aging flag is word-bounded (no "imaging"/"staging"); `\bigan\b` (no "Michigan"); a registry intervention type of DRUG with no recognisable name stays `Drug (unclassified)` (≈47% of the universe) instead of "Small molecule".
+- Labels: listing() returns `No SEC equity match` / `Private (known)` rather than "Unlisted / private"; "firm dates" → "actual registry dates"; "Enrollment pace" → "Enrollment / month" (schedule-density proxy); the modality heat map is titled Modality × therapeutic area (that is what it plots).
+- Layout: `#app>*{min-width:0}` plus header media tiers at 1400 / 1150 / 1000 / 820 px keep the document at viewport width (it was 1466 px at a 1280 px viewport); the tab strip scrolls under 1100 px.
+- Live refresh: works on saros.gcarosso.bio (the "hosted copy is sandboxed" copy was wrong); after a merge the status bar shows the merged count separately from the weekly snapshot diff.
+
 ## Known gotchas
 - 13F XML uses namespace prefixes on both tags and attributes; strip both before parsing (done in pull_13f.py). Generalist managers (Point72, Viking, Woodline, Polar, Farallon) are tracked but counted separately (`gen` flag) so they don't dilute the specialist count.
 - Form 4: 10%-owners and corporate reporters (e.g. Genmab's tender purchases of Merus) must be excluded from the insider-buy signal; they are tallied as `own10_*`.

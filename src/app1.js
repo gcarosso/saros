@@ -52,6 +52,8 @@ function spDom(name,tier){if(tier==='China-domiciled')return'China / HK / TW';if
 /* base-rate priors (Wong, Siah & Lo 2019; approximate, phase-transition) */
 const PRIOR={onc:{P1:.576,P2:.327,P3:.355,'P1/P2':.45,'P2/P3':.34},non:{P1:.735,P2:.60,P3:.68,'P1/P2':.66,'P2/P3':.64}};
 function prior(t){const k=t.ta==='Oncology'?'onc':'non';return PRIOR[k][t.ph]??.5;}
+/* cumulative probability of approval from this phase = product of the remaining phase-transition rates (seamless P2/P3 treated as pivotal) */
+function approvalPrior(t){const P=PRIOR[t.ta==='Oncology'?'onc':'non'];switch(t.ph){case 'P3':return P.P3;case 'P2/P3':return P['P2/P3'];case 'P2':return P.P2*P.P3;case 'P1/P2':return P['P1/P2']*P.P3;case 'P1':return P.P1*P.P2*P.P3;default:return .5*P.P3;}}
 
 /* readout-confidence heuristic */
 function confidence(t){
@@ -77,8 +79,13 @@ let BENCH={}, F13={funds:[],issuers:{},pulled:''}, INS={byTk:{},byCik:{},pulled:
 let DATA=null, T=[], FDA=[], META={}, IDX=new Map(), REG={rows:[],byTk:{},pulled:'',source:''}, DIFF={}, FD={issuers:{}}, NIH={orgs:{}};
 function normName(n){n=n.toLowerCase().replace(/&/g,'and').replace(/[^a-z0-9 ]/g,' ').replace(/\b(inc|corp|corporation|ltd|limited|plc|llc|co|company|holdings?|the|sa|ag|nv|bv|spa|se|kk|kabushiki kaisha|group|usa|us)\b/g,' ');return n.replace(/\s+/g,' ').trim();}
 function secFor(t){const a=DATA.sec&&DATA.sec[normName(t.sp)];if(a)return a;const m=DATA.secman&&DATA.secman[t.grp];return m||null;}
-function listing(sec){if(!sec)return'Unlisted / private';if(sec.t==='private')return'Unlisted / private';return['Nasdaq','NYSE','NYSE American','NYSE Arca','CBOE'].includes(sec.ex)?'US-listed':'Listed ex-US / OTC';}
-function runway(sec){if(!sec||sec.cash==null)return null;const cash=(sec.cash||0)+(sec.sti||0);const q=(sec.niq||[]).filter(x=>x!=null);let burn=null;if(q.length)burn=-q.reduce((a,b)=>a+b,0)/q.length*4;else if(sec.ni!=null)burn=-sec.ni;if(burn==null||burn<=0)return{cash,burn,yrs:Infinity};return{cash,burn,yrs:cash/burn};}
+function listing(sec){if(!sec)return'No SEC equity match';if(sec.t==='private')return'Private (known)';return['Nasdaq','NYSE','NYSE American','NYSE Arca','CBOE'].includes(sec.ex)?'US-listed':'Listed ex-US / OTC';}
+/* runway = (cash + short-term investments) / annual burn. Burn is FY operating cash outflow where XBRL reports it (basis 'ocf');
+   otherwise the annualised net loss, an accounting proxy that the UI labels as such (basis 'niq' / 'ni'). Missing inputs → null, never 0. */
+function runway(sec){if(!sec||sec.cash==null)return null;const cash=(sec.cash||0)+(sec.sti||0);let burn=null,basis=null;
+  if(sec.ocf!=null){burn=-sec.ocf;basis='ocf';}
+  else{const q=(sec.niq||[]).filter(x=>x!=null);if(q.length){burn=-q.reduce((a,b)=>a+b,0)/q.length*4;basis='niq';}else if(sec.ni!=null){burn=-sec.ni;basis='ni';}}
+  if(burn==null)return null;if(burn<=0)return{cash,burn,yrs:Infinity,basis};return{cash,burn,yrs:cash/burn,basis};}
 function enrich(){
   const t0=performance.now();
   if(DATA.f13){F13=DATA.f13;}
@@ -92,7 +99,7 @@ function enrich(){
     t.days=Math.round((d-TODAY)/864e5);
     t.grp=spGroup(t.sp);t.tier=spTier(t.sp,t.grp);t.dom=spDom(t.sp,t.tier);t.sec=secFor(t);t.lst=listing(t.sec);
     t.own=t.f13&&F13.issuers[t.f13]?F13.issuers[t.f13]:null;t.ins=(t.sec&&t.sec.cik&&INS.byCik[String(t.sec.cik)])||(t.sec&&t.sec.t!=='private'&&INS.byTk[t.sec.t])||null;t.reg=(t.sec&&t.sec.t!=='private'&&REG.byTk[t.sec.t])||null;t.mcap=(t.sec&&t.sec.flt)||null;t.fdi=(t.fd&&FD.issuers[t.fd])||null;t.nihi=(t.nih&&NIH.orgs[t.nih])||null;
-    const c=confidence(t);t.conf=c.score;t.why=c.why;t.pri=prior(t);t.dsg=designTags(t);
+    const c=confidence(t);t.conf=c.score;t.why=c.why;t.pri=prior(t);t.pos=approvalPrior(t);t.dsg=designTags(t);
     t.hay=(t.id+' '+t.t+' '+t.ot+' '+t.ac+' '+t.sp+' '+t.grp+' '+t.c.join(' ')+' '+t.k.join(' ')+' '+t.iv.map(x=>x[1]).join(' ')+' '+(t.moa||[]).join(' ')+' '+(t.sec&&t.sec.t!=='private'?t.sec.t:'')).toLowerCase();
     IDX.set(t.id,t);return t;
   });
@@ -146,7 +153,7 @@ function decide(t){
   const stopped=['TERMINATED','WITHDRAWN','SUSPENDED'].includes(t.st);
   t.rel=stopped?'stopped':t.pct==='ACTUAL'?'firm':(t.slip>=1&&!t.frm)?'slipped':'estimated';
   t.m2e=t.days>0?t.days/30.4:0;
-  const profitable=t.tier==='Large pharma'||(t.sec&&((t.sec.ni||0)>0||(t.sec.rev||0)>1e9));
+  const profitable=t.tier==='Large pharma'||!!(t.sec&&(t.sec.ocf!=null?t.sec.ocf>0:(t.sec.ni||0)>0));   /* cash-generative on the reported basis; revenue alone proves nothing */
   t.cashm=profitable?null:(t.sec?((r=>r&&isFinite(r.yrs)?r.yrs*12:null)(runway(t.sec))):null);
   t.binding=t.cashm!=null&&t.days>0&&t.cashm<t.m2e;
   const loa=t.pri;const mc=t.mcap;
@@ -162,8 +169,8 @@ function decide(t){
   else if(t.rel==='slipped'){a='Wait';why=`date slipped ${t.slip} mo since last snapshot`;}
   else if(t.own&&t.own.new>=2&&t.days<=180){a='Review flow';why=`${t.own.new} specialists new last quarter`;}
   else if(t.ins&&t.ins.buy_usd>=250000&&t.ins.buy_n>=2&&t.days<=180){a='Review flow';why='insider buy cluster';}
-  else if(t.velR!=null&&t.velR<0.5&&t.st==='RECRUITING'){a='Diligence enrollment';why=`pace ${t.velR.toFixed(1)}× peer median`;}
-  else if(t.conf>=75&&t.rel==='firm'&&t.ph==='P3'){a='Size / diligence endpoints';why='firm date, high confidence';}
+  else if(t.velR!=null&&t.velR<0.5&&t.st==='RECRUITING'){a='Diligence enrollment';why=`enrollment density ${t.velR.toFixed(1)}× peer median`;}
+  else if(t.conf>=75&&t.rel==='firm'&&t.ph==='P3'){a='Size / diligence endpoints';why='actual registry date, high confidence';}
   else if(t.ph==='P3'&&t.days<=180){a='Diligence endpoints';why='pivotal readout inside 6 mo';}
   else {a='Monitor';why=t.days>365?'readout > 12 mo out':'no flag';}
   t.action=a;t.actionWhy=why;

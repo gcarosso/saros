@@ -34,6 +34,34 @@ def test_no_bpc_references_in_sources():
         t = open(os.path.join(ROOT, f), encoding="utf-8").read().lower()
         assert "biopharmcatalyst" not in t and "bpc" not in t, f
 
+TABLE = ("PRODUCT AND PIPELINE UPDATES Asset(s) Date Announced Milestone Reblozyl (luspatercept) July 30 The U.S. Food and Drug Administration (FDA) "
+         "accepted the supplemental Biologics License Application for Reblozyl with concomitant janus kinase inhibitor therapy in adult patients with "
+         "myelofibrosis-associated anemia. The FDA granted a Prescription Drug User Fee Act (PDUFA) date of March 11, 2027. mezigdomide July 13 The FDA "
+         "accepted a New Drug Application for mezigdomide in combination with carfilzomib and dexamethasone (MeziKd) in patients with relapsed or "
+         "refractory multiple myeloma (RRMM), granting a PDUFA date of May 13, 2027. The filing was based on positive results.")
+
+def test_multi_date_sentence_assigns_each_date_its_own_asset():
+    c = {x["date"]: x for x in pp.extract(TABLE)}
+    assert c["2027-05-13"]["asset"].lower().startswith("mezigdomide")
+    assert c["2027-03-11"]["asset"].startswith("Reblozyl"), "asset named in the preceding table cell, not in the next clause"
+
+def test_refinalize_recomputes_asset_from_the_dates_own_clause():
+    sent = "The FDA granted a PDUFA date of March 11, 2027. mezigdomide July 13 The FDA accepted an NDA for mezigdomide, granting a PDUFA date of May 13, 2027."
+    assert pp.clause_of(sent, "2027-05-13").lower().find("mezigdomide") >= 0
+    assert "mezigdomide" not in pp.clause_of(sent, "2027-03-11")
+    assert pp.clause_of(sent, "2028-01-01") == "", "a date the sentence does not state has no clause"
+
+def test_trading_plan_tables_are_not_regulatory_dates():
+    t = "Name and Title of Director or Officer Action Date Trading Arrangement Rule 10b5-1 John Bishop, CFO, adopted November 6, 2026 Expiration Date February 15, 2027."
+    assert pp.extract(t) == []
+
+def test_lowercase_inn_is_found_as_a_last_resort():
+    assert pp.asset_of("Potential FDA approval of bezuclastinib in GIST - PDUFA date of November 30, 2026") == "bezuclastinib"
+
+def test_ticker_choice_prefers_common_stock_over_rights():
+    bmy = {"cik": 14272, "t": "BMY", "n": "BRISTOL MYERS SQUIBB CO", "ex": "NYSE"}; cvr = {**bmy, "t": "CELG-RI"}
+    assert pp.rank_ticker(bmy) < pp.rank_ticker(cvr)
+
 CHROME = next((p for p in ("/Applications/Google Chrome.app/Contents/MacOS/Google Chrome", shutil.which("chromium"), shutil.which("google-chrome")) if p and os.path.exists(p)), None)
 
 @pytest.mark.skipif(not os.path.exists(os.path.join(ROOT, "saros.html")) or not CHROME, reason="needs built saros.html and a local Chrome")
