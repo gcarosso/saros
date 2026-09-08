@@ -4,6 +4,8 @@
 
 **A navigator of today's clinical-trial landscape, mapped to the money around it. Its horizon spans 2026–2028. Public sources only, refreshed weekly.**
 
+Live at [saros.gcarosso.bio](https://saros.gcarosso.bio). Built by [Giovanni Carosso](https://gcarosso.bio).
+
 ![SAROS — readout calendar, catalyst timeline, dossier](docs/screenshot.png)
 
 > [PARAGRAPH — Gio: what this is and who it is for, in your words. Suggested facts to draw on: every industry-sponsored Phase 1–3 trial registered on ClinicalTrials.gov with a primary-completion date in 2026–28 (10,000+), joined per trial to sponsor cash and runway (SEC XBRL), specialist-fund ownership (13F), insider trades (Form 4), PDUFA / AdCom dates as disclosed in SEC filings, private-round funding (Form D), NIH awards, and a curated mechanism note. Built for specialist biotech investors; a single HTML file, no server.]
