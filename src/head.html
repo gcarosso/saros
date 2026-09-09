@@ -13,6 +13,36 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://saros.gcarosso.bio/og-saros.png?v=2">
 <link rel="author" href="https://gcarosso.bio/">
+<meta name="author" content="Giovanni Carosso">
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@type": "WebApplication",
+ "@id": "https://saros.gcarosso.bio/#app",
+ "name": "SAROS",
+ "alternateName": "SAROS clinical trial readout calendar",
+ "url": "https://saros.gcarosso.bio/",
+ "description": "SAROS compares programs, not molecules: a public ledger of clinical readouts, 2026–2028, built from ClinicalTrials.gov and SEC filings. Public data only, non-advisory.",
+ "applicationCategory": "Research tool",
+ "operatingSystem": "Any (browser)",
+ "isAccessibleForFree": true,
+ "license": "https://www.apache.org/licenses/LICENSE-2.0",
+ "codeRepository": "https://github.com/gcarosso/saros",
+ "author": {
+  "@type": "Person",
+  "@id": "https://gcarosso.bio/#person",
+  "name": "Giovanni Carosso",
+  "url": "https://gcarosso.bio/"
+ },
+ "creator": {
+  "@id": "https://gcarosso.bio/#person"
+ },
+ "copyrightHolder": {
+  "@id": "https://gcarosso.bio/#person"
+ },
+ "copyrightYear": 2026
+}
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
@@ -60,6 +90,9 @@ button:focus-visible,input:focus-visible,select:focus-visible,[tabindex]:focus-v
 #brand .name{letter-spacing:.2em;font-weight:600;font-size:19px;line-height:1}
 #brand .sub{font-size:13px;margin-left:0;letter-spacing:.04em;font-family:var(--mono)}
 #brand .sub{font-weight:400;color:var(--ink-3);font-size:11px;margin-left:2px}
+#brand .by{font-family:var(--mono);font-size:11px;font-weight:400;letter-spacing:.03em;color:var(--ink-3);text-decoration:none;margin-left:8px}#brand .by:hover{color:var(--hot)}
+#status a{color:var(--ink-2);text-decoration:none}#status a:hover{color:var(--hot)}
+.about-hero .byline{margin-top:10px;font-size:13px;color:var(--ink-3)}.about-hero .byline a{color:var(--ink-2);text-decoration:none}.about-hero .byline a:hover{color:var(--hot)}
 #search{flex:1;max-width:420px;min-width:220px;display:flex;align-items:center;gap:8px;background:var(--g2);border:1px solid var(--line);border-radius:6px;padding:0 10px;height:30px;color:var(--hot);cursor:text;font-size:13.5px}
 #search input::placeholder{color:var(--hot);opacity:.85}
 #search input{flex:1;background:none;border:0;color:var(--ink);font:inherit;outline:none}
@@ -81,7 +114,8 @@ button:focus-visible,input:focus-visible,select:focus-visible,[tabindex]:focus-v
 @media (prefers-reduced-motion:reduce){#content{scroll-behavior:auto} *{transition:none!important;animation:none!important}}
 #status{display:flex;align-items:center;gap:18px;padding:0 14px;background:var(--g1);border-top:1px solid var(--line);font-family:var(--mono);font-size:11.5px;color:var(--ink-3);white-space:nowrap;overflow:hidden}
 #status b{color:var(--ink-2);font-weight:500}
-#status .sp{flex:1}
+#status .sp{flex:1}#top .seg,#topright{flex:none}
+@media (max-width:1700px){#st-key{display:none}}
 
 /* ---------- rail ---------- */
 .fgroup{margin-bottom:14px}
@@ -213,7 +247,7 @@ table.t td.num,table.t th.num{text-align:right;font-family:var(--mono)}
 .grid3{display:grid;grid-template-columns:2fr 1fr;gap:12px}
 /* the header must never be wider than the viewport: a grid track sizes to its min-content, so an unshrinkable header would push the whole app past the right edge (seen at 1280: document 1466 px) */
 #app>*{min-width:0}
-@media (max-width:1400px){#brand .sub{display:none}#search{min-width:150px}#top,#topright{gap:6px}#freshtxt{display:none}.btn,.toplink{padding:0 8px}}
+@media (max-width:1600px){#brand .sub{display:none}#st-mem{display:none}#st-key{display:none}#search{min-width:150px}#top,#topright{gap:6px}#freshtxt{display:none}.btn,.toplink{padding:0 8px}}
 @media (max-width:1150px){#search{min-width:110px}#search kbd{display:none}#top .seg button,.toplink{padding:0 6px;font-size:12px}#brand{margin-right:0}#brand .name{font-size:16px}}
 @media (max-width:1100px){.tabs{overflow-x:auto;scrollbar-width:thin}.tab{flex:none}}
 @media (max-width:820px){#exportbtn{display:none}#search{min-width:80px}#wlbtn .num{display:none}}
