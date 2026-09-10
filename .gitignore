@@ -32,3 +32,6 @@ data/nih_raw.json
 data/facts_cache/
 data/facts_raw.json
 data/matched_ciks.json
+data/subs_cache/
+data/subs_raw.json
+data/prices_raw.json

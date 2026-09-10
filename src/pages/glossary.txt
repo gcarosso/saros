@@ -15,10 +15,11 @@ conf: Readout confidence, 0 to 100: a transparent rule-based score of how likely
 prior: Base-rate prior: the historical share of trials at this phase that advance to the next one, oncology versus non-oncology (Wong, Siah & Lo, 2019). The dossier also shows the cumulative probability of approval from this phase. A population average, not a view on this asset.
 vel: Registered enrollment divided by months from study start to primary completion. That span includes follow-up, so this is a schedule-density proxy, not observed recruitment speed.
 impact: How much attention a readout deserves: phase weight × the literature prior × company size (public float, i.e. tradability, not expected stock move) × whether the registry date is actual × a discount when many specialists already hold the name. Bucketed High, Med, Low.
-action: The next step from an ordered rule list (Pass, Cash flag, Wait, Review flow, Diligence, Size, Monitor). Hover a value for the rule that fired. Rules, not advice.
+action: The first rule that fired for this trial, as a flag: Stopped, Cash flag, Date passed, Date unconfirmed, Date slipped, Specialist adds, Insider buys, Enrollment lag, Pivotal (actual date), Pivotal inside 6 months, or No flag. Hover a value for the rule. A flag describes the record; it is not advice.
+filings: What the sponsor filed with the SEC after the balance-sheet date shown above: financing forms, ownership schedules, 8-Ks and periodic reports, each linked to EDGAR. A financing filed after the balance sheet is not in the cash figure.
 days: Days from today to the registered primary-completion date. Negative means the date has passed.
 readout: Registered primary-completion date: when the last patient finishes the primary endpoint. It is not the date results are announced. “A” = the sponsor reported it as actual rather than estimated. Month-only dates sit on the 15th. Red/green badge = moved since the previous snapshot.
-mcap: Public float as reported to the SEC (dei EntityPublicFloat), a market-cap proxy for US filers; ex-US listings show none.
+mcap: Market cap = last close × shares outstanding from the SEC cover page. The close comes from an unofficial quote endpoint and carries its date in the dossier. Where no quote is available the SEC public float is shown instead, marked “f”.
 n: Registered enrollment, planned or actual.
 sponsor: Lead sponsor, mapped to its group (e.g. Genentech → Roche). A dot marks large pharma; the badge is the ticker.
 presets: Same data, different starting question. Book = your starred trials. Catalysts = pivotal readouts sorted by impact. Landscape = the whole universe by date. Private = venture-backed and longevity names.
@@ -38,7 +39,7 @@ f13: Quarterly 13F filings list what US funds hold. Counting biotech-specialist 
 form4: Form 4 filings report insider trades. Clustered open-market buys by officers and directors are the signal; sells are routine.
 reg: PDUFA target dates, advisory-committee meetings and planned resubmissions, read from the sponsor’s own SEC filings; each row links to the filing. ≈ means the company only gave a month or quarter.
 rnpv: Risk-adjusted net present value: a deliberately simple sketch you can stress-test, pre-filled from the registry, the literature prior and SEC share counts. Not a forecast.
-decision: Where the ordered rules landed for this trial and why. Impact, date firmness and cash-to-event are the inputs.
+decision: The first rule that fired for this trial and why. Impact, date firmness and cash-to-event are the inputs; the line also says when the cash test was not applied.
 pdufa: PDUFA date: the deadline by which the FDA has committed to act on a filing. The FDA does not publish these; SAROS reads them from the companies’ own SEC filings and links each one to its source.
 tab-cal: Every trial in view, one row each, sortable by any column. Click a row for the dossier.
 tab-spon: The sponsor is the unit of analysis: league table, program profile and the sponsors whose programs look most alike.

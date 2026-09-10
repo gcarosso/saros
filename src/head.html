@@ -306,11 +306,12 @@ table.t td.num,table.t th.num{text-align:right;font-family:var(--mono)}
 #rnpv-form input{background:var(--g2);border:1px solid var(--line);color:var(--ink);border-radius:4px;height:22px;padding:0 6px;font:inherit;font-family:var(--mono);font-size:11.5px}
 /* ---------- decision layer ---------- */
 .decision{border:1px solid var(--line-2);border-radius:6px;padding:8px 10px;margin:8px 0 4px;background:var(--g2)}
-.decision.pass{border-color:rgba(229,72,77,.45);background:rgba(229,72,77,.06)}.decision.wait{border-color:rgba(224,163,11,.45);background:rgba(224,163,11,.06)}
-.decision.size,.decision.review{border-color:rgba(47,191,113,.45);background:rgba(47,191,113,.06)}
+.decision.stopped,.decision.cash{border-color:rgba(229,72,77,.45);background:rgba(229,72,77,.06)}.decision.date,.decision.enroll{border-color:rgba(224,163,11,.45);background:rgba(224,163,11,.06)}
+.decision.pivotal,.decision.flow{border-color:rgba(47,191,113,.45);background:rgba(47,191,113,.06)}
 .decision .dl{font-size:13px;margin:2px 0 4px}.decision .dm{display:flex;flex-wrap:wrap;gap:12px;font-size:12px;color:var(--ink-2)}.decision .dm b{color:var(--ink);font-weight:500}
 .imp{font-family:var(--mono);font-size:12px}.imp.High{color:var(--crit)}.imp.Med{color:var(--amber)}.imp.Low{color:var(--ink-3)}
-.act{font-size:12px;white-space:nowrap}.act.pass{color:#ff8a8e}.act.wait{color:#f2c46b}.act.size,.act.review{color:#7fe0aa}.act.diligence{color:var(--acc)}.act.monitor{color:var(--ink-3)}
+.act{font-size:12px;white-space:nowrap}.act.stopped,.act.cash{color:#ff8a8e}.act.date{color:#f2c46b}.act.pivotal,.act.flow{color:#7fe0aa}.act.enroll{color:var(--acc)}.act.none{color:var(--ink-3)}
+.fl{font-size:12px;line-height:1.7;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.fl a{text-decoration:none}
 .torn{display:grid;grid-template-columns:150px 1fr;align-items:center;gap:8px;height:22px;font-size:11px}
 .torn .tl{color:var(--ink-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .torn .tt{position:relative;height:12px;background:var(--g3);border-radius:2px}

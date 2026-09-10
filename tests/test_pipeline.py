@@ -72,6 +72,20 @@ def test_companyfacts_extract_finds_edgewise_style_investments():
     assert f["ocf_months"] == 6 and abs(f["ocf_run"] - (-170e6)) < 1 and f["ocf_fy"] == -143.8e6
     assert f["debt"] is None, "a 2022 debt figure is not the current balance sheet"
 
+def test_submissions_compact_keeps_the_right_forms():
+    import datetime
+    ps = importlib.import_module("pull_submissions")
+    today = datetime.date(2026, 9, 10)
+    rec = {"form": ["8-K", "424B5", "SC 13G/A", "10-Q", "4", "S-3ASR", "8-K", "DEF 14A"], "filingDate": ["2026-08-06", "2026-07-13", "2026-02-10", "2026-08-06", "2026-08-01", "2024-01-01", "2025-05-01", "2026-04-20"],
+           "accessionNumber": ["0001-26-1", "0001-26-2", "0001-26-3", "0001-26-4", "0001-26-5", "0001-24-6", "0001-25-7", "0001-26-8"], "primaryDocument": ["a.htm"] * 8, "primaryDocDescription": ["8-K"] * 8, "items": ["2.02"] * 8}
+    out = ps.compact({"cik": 1710072, "filings": {"recent": rec}}, today)
+    forms = [x["f"] for x in out]
+    assert "424B5" in forms and "SC 13G/A" in forms and "10-Q" in forms and "DEF 14A" in forms
+    assert "4" not in forms, "Form 4 is the insider layer, not a filing row"
+    assert "S-3ASR" not in forms, "older than 24 months"
+    assert forms.count("8-K") == 1, "8-Ks older than 12 months are dropped"
+    assert out[0]["url"].startswith("https://www.sec.gov/Archives/edgar/data/1710072/")
+
 def test_aging_flag_is_word_bounded():
     ag = _rx("AG")
     assert ag.search("A study of healthy aging and frailty") and ag.search("anti-ageing intervention")

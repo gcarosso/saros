@@ -99,7 +99,7 @@ function enrich(){
     t.pd=d;t.pm=t.pcd.slice(0,7);t.pq=t.pm.slice(0,4)+' Q'+(Math.floor((+t.pm.slice(5,7)-1)/3)+1);
     t.days=Math.round((d-TODAY)/864e5);
     t.grp=spGroup(t.sp);t.tier=spTier(t.sp,t.grp);t.dom=spDom(t.sp,t.tier);t.sec=secFor(t);t.lst=listing(t.sec);
-    t.own=t.f13&&F13.issuers[t.f13]?F13.issuers[t.f13]:null;t.ins=(t.sec&&t.sec.cik&&INS.byCik[String(t.sec.cik)])||(t.sec&&t.sec.t!=='private'&&INS.byTk[t.sec.t])||null;t.reg=(t.sec&&t.sec.t!=='private'&&REG.byTk[t.sec.t])||null;t.mcap=(t.sec&&t.sec.flt)||null;t.fdi=(t.fd&&FD.issuers[t.fd])||null;t.nihi=(t.nih&&NIH.orgs[t.nih])||null;
+    t.own=t.f13&&F13.issuers[t.f13]?F13.issuers[t.f13]:null;t.ins=(t.sec&&t.sec.cik&&INS.byCik[String(t.sec.cik)])||(t.sec&&t.sec.t!=='private'&&INS.byTk[t.sec.t])||null;t.reg=(t.sec&&t.sec.t!=='private'&&REG.byTk[t.sec.t])||null;t.mcap=(t.sec&&(t.sec.mcap||t.sec.flt))||null;t.mcapSrc=t.sec&&t.sec.mcap?'price':t.sec&&t.sec.flt?'float':null;t.fdi=(t.fd&&FD.issuers[t.fd])||null;t.nihi=(t.nih&&NIH.orgs[t.nih])||null;
     const c=confidence(t);t.conf=c.score;t.why=c.why;t.pri=prior(t);t.pos=approvalPrior(t);t.dsg=designTags(t);
     t.hay=(t.id+' '+t.t+' '+t.ot+' '+t.ac+' '+t.sp+' '+t.grp+' '+t.c.join(' ')+' '+t.k.join(' ')+' '+t.iv.map(x=>x[1]).join(' ')+' '+(t.moa||[]).join(' ')+' '+(t.sec&&t.sec.t!=='private'?t.sec.t:'')).toLowerCase();
     IDX.set(t.id,t);return t;
@@ -165,18 +165,19 @@ function decide(t){
   const crowd=t.own&&t.own.n>=5?.85:1;
   t.impact=PH_W[t.ph]*(0.5+loa)*size*firm*crowd;t.impactB=t.impact>=.62?'High':t.impact>=.35?'Med':'Low';
   let a,why;
-  if(stopped){a='Pass';why='study stopped';}
-  else if(t.binding){a='Cash flag';why=`cash ${Math.round(t.cashm)} mo < ${Math.round(t.m2e)} mo to primary completion`;}
-  else if(t.days<0&&t.pct!=='ACTUAL'){a='Wait';why='completion date passed, still estimated';}
-  else if(t.rel==='estimated'&&t.days<=90){a='Wait';why='date unconfirmed inside 90 d';}
-  else if(t.rel==='slipped'){a='Wait';why=`date slipped ${t.slip} mo since last snapshot`;}
-  else if(t.own&&t.own.new>=2&&t.days<=180){a='Review flow';why=`${t.own.new} specialists new last quarter`;}
-  else if(t.ins&&t.ins.buy_usd>=250000&&t.ins.buy_n>=2&&t.days<=180){a='Review flow';why='insider buy cluster';}
-  else if(t.velR!=null&&t.velR<0.5&&t.st==='RECRUITING'){a='Diligence enrollment';why=`enrollment density ${t.velR.toFixed(1)}× peer median`;}
-  else if(t.conf>=75&&t.rel==='firm'&&t.ph==='P3'){a='Size / diligence endpoints';why='actual registry date, high confidence';}
-  else if(t.ph==='P3'&&t.days<=180){a='Diligence endpoints';why='pivotal readout inside 6 mo';}
-  else {a='Monitor';why=t.days>365?'readout > 12 mo out':'no flag';}
-  t.action=a;t.actionWhy=why;
+  let cls='none';
+  if(stopped){a='Stopped';why='study stopped';cls='stopped';}
+  else if(t.binding){a='Cash flag';why=`cash ${Math.round(t.cashm)} mo < ${Math.round(t.m2e)} mo to primary completion`;cls='cash';}
+  else if(t.days<0&&t.pct!=='ACTUAL'){a='Date passed';why='completion date passed, still estimated';cls='date';}
+  else if(t.rel==='estimated'&&t.days<=90){a='Date unconfirmed';why='estimated date inside 90 d';cls='date';}
+  else if(t.rel==='slipped'){a='Date slipped';why=`primary completion moved ${t.slip} mo since the last snapshot`;cls='date';}
+  else if(t.own&&t.own.new>=2&&t.days<=180){a='Specialist adds';why=`${t.own.new} specialist funds new last quarter`;cls='flow';}
+  else if(t.ins&&t.ins.buy_usd>=250000&&t.ins.buy_n>=2&&t.days<=180){a='Insider buys';why='clustered open-market buys';cls='flow';}
+  else if(t.velR!=null&&t.velR<0.5&&t.st==='RECRUITING'){a='Enrollment lag';why=`enrollment density ${t.velR.toFixed(1)}× peer median`;cls='enroll';}
+  else if(t.conf>=75&&t.rel==='firm'&&t.ph==='P3'){a='Pivotal, actual date';why='Phase 3, actual registry date, confidence ≥ 75';cls='pivotal';}
+  else if(t.ph==='P3'&&t.days<=180){a='Pivotal inside 6 mo';why='Phase 3 primary completion inside 180 d';cls='pivotal';}
+  else {a='No flag';why=t.days>365?'primary completion > 12 mo out':'no rule fired';}
+  t.action=a;t.actionWhy=why;t.flagClass=cls;
 }
 /* ---------- investor lookup ---------- */
 let LVINV={};function buildInvestors(){LVINV={};(DATA.longevity||[]).forEach(l=>{(l.inv||'').split(';').map(x=>x.trim()).filter(x=>x&&!/not disclosed|undisclosed|investors$/i.test(x)).forEach(v=>{(LVINV[v]=LVINV[v]||new Set()).add(l.co);});});}

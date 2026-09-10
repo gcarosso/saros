@@ -5,7 +5,7 @@ export PATH := /opt/homebrew/bin:$(PATH)
 DATA = data
 SNAP = $(DATA)/snapshot.json.gz
 
-.PHONY: all pull pull-trials pull-facts pull-sec pull-13f pull-insiders pull-pdufa pull-pdufa-full pull-formd pull-nih rotate process build test serve clean refresh install-launchd uninstall-launchd
+.PHONY: all pull pull-trials pull-facts pull-subs pull-prices pull-sec pull-13f pull-insiders pull-pdufa pull-pdufa-full pull-formd pull-nih rotate process build test serve clean refresh install-launchd uninstall-launchd
 
 all: process build
 
@@ -27,6 +27,10 @@ pull-formd:       ## SEC Form D quarterly data sets → formd_raw.json (cached p
 	cd $(DATA) && $(PY) pull_formd.py
 pull-facts:       ## SEC XBRL companyfacts for every matched issuer (needs matched_ciks.json from process; ≈2 min, cached 6 days)
 	cd $(DATA) && $(PY) pull_facts.py
+pull-subs:        ## SEC EDGAR submissions per matched issuer (filings since the balance sheet; cached 1 day)
+	cd $(DATA) && $(PY) pull_submissions.py
+pull-prices:      ## last close per matched US ticker (Yahoo chart / Nasdaq quote, unofficial; once per day)
+	cd $(DATA) && $(PY) pull_prices.py
 pull-nih:         ## NIH RePORTER awards for venture-tail sponsors + longevity cohort → nih_raw.json (cached per name; new names only)
 	cd $(DATA) && $(PY) pull_nih.py
 
@@ -51,6 +55,8 @@ refresh:          ## weekly job: pull → process → build → test (≈8 min);
 	$(MAKE) rotate
 	$(MAKE) process
 	$(MAKE) pull-facts
+	$(MAKE) pull-subs
+	$(MAKE) pull-prices
 	$(MAKE) process
 	$(MAKE) build
 	$(MAKE) test

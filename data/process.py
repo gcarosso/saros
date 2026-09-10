@@ -131,6 +131,25 @@ try:
         if f.get("flt"): v["flt"]=f["flt"]; v["fltper"]=f.get("flt_per","")
         n_over+=1
     print("companyfacts override",n_over,"issuers","pulled",FACTS_PULLED)
+    # last close (unofficial quote, dated) → market cap = close × shares; the SEC float stays as the fallback
+    PX={}; PX_PULLED=""
+    try:
+        pr=json.load(open(os.path.join(OUT,"prices_raw.json"))); PX=pr.get("px",{}); PX_PULLED=pr.get("pulled","")
+    except Exception: pass
+    n_px=0
+    for v in list(SEC.values())+list(MANOUT.values()):
+        q=PX.get(v.get("t"))
+        if not q: continue
+        v.update({"px":q["px"],"pxd":q["d"],"pxsrc":q["src"]})
+        if v.get("sh"): v["mcap"]=q["px"]*v["sh"]
+        n_px+=1
+    print("prices",n_px,"issuers","pulled",PX_PULLED)
+    # filings since the balance sheet: SEC submissions per matched issuer
+    SUBS={}; SUBS_PULLED=""
+    try:
+        sj=json.load(open(os.path.join(OUT,"subs_raw.json"))); SUBS=sj.get("subs",{}); SUBS_PULLED=sj.get("pulled","")
+    except Exception: pass
+    print("submissions",len(SUBS),"issuers","pulled",SUBS_PULLED)
 except Exception as e:
     print("SEC join skipped:",e); MANOUT={}
 # Regulatory calendar: company-disclosed PDUFA / AdCom / resubmission dates from SEC EDGAR full-text search (pull_pdufa.py)
@@ -313,6 +332,10 @@ else: print("no prev_snapshot.json.gz — diff skipped")
 # per-loader status: what was pulled when, and how many rows made it in; the Method tab shows this table and refresh writes it to data/status.json
 try: _fp=FACTS_PULLED
 except NameError: _fp=""
+try: _px,_pxn=PX_PULLED,len(PX)
+except NameError: _px,_pxn="",0
+try: _sp,_spn,_subs=SUBS_PULLED,len(SUBS),SUBS
+except NameError: _sp,_spn,_subs="",0,{}
 STATUS={"trials":{"pulled":d["pulled"],"rows":len(rows),"source":"ClinicalTrials.gov API v2"},
         "fda":{"pulled":(f.get("pulled","") if isinstance(f,dict) else ""),"rows":len(fda),"source":"openFDA Drugs@FDA"},
         "sec":{"pulled":(sec.get("pulled","") if SEC else ""),"rows":len(SEC)+len(MANOUT),"source":"SEC company tickers + XBRL frames"},
@@ -322,9 +345,11 @@ STATUS={"trials":{"pulled":d["pulled"],"rows":len(rows),"source":"ClinicalTrials
         "ins":{"pulled":INSD.get("pulled",""),"rows":len(INSD.get("byTk",{})),"source":"SEC insider-transactions data sets"},
         "short":{"pulled":INSD.get("pulled",""),"rows":len(INSD.get("short",{})),"source":"FINRA consolidated short interest"},
         "formd":{"pulled":FD.get("pulled",""),"rows":len(FD.get("issuers",{})),"source":"SEC Form D data sets"},
-        "nih":{"pulled":NIH.get("pulled",""),"rows":len(NIH.get("orgs",{})),"source":"NIH RePORTER"}}
+        "nih":{"pulled":NIH.get("pulled",""),"rows":len(NIH.get("orgs",{})),"source":"NIH RePORTER"},
+        "px":{"pulled":_px,"rows":_pxn,"source":"last close, Yahoo chart / Nasdaq quote (unofficial)"},
+        "subs":{"pulled":_sp,"rows":_spn,"source":"SEC EDGAR submissions per matched issuer"}}
 json.dump({"built":datetime.datetime.utcnow().isoformat()+"Z","loaders":STATUS},open(os.path.join(OUT,"status.json"),"w"),indent=1)
-snap={"meta":{"pulled":d["pulled"],"ct_query":d["query"],"n_trials":len(rows),"n_fda":len(fda),"built":datetime.datetime.utcnow().isoformat()+"Z"},"status":STATUS,"trials":rows,"fda":fda,"longevity":LV,"sec":SEC,"secman":MANOUT,"reg":REG,"f13":F13,"ins":INSD,"formd":FD,"nih":NIH,"diff":DIFF,"sec_pulled":sec.get("pulled","") if SEC else ""}
+snap={"meta":{"pulled":d["pulled"],"ct_query":d["query"],"n_trials":len(rows),"n_fda":len(fda),"built":datetime.datetime.utcnow().isoformat()+"Z"},"status":STATUS,"trials":rows,"fda":fda,"longevity":LV,"sec":SEC,"subs":_subs,"secman":MANOUT,"reg":REG,"f13":F13,"ins":INSD,"formd":FD,"nih":NIH,"diff":DIFF,"sec_pulled":sec.get("pulled","") if SEC else ""}
 js=json.dumps(snap,separators=(",",":"),ensure_ascii=False)
 open(os.path.join(OUT,"snapshot.json"),"w").write(js)
 with gzip.open(os.path.join(OUT,"snapshot.json.gz"),"wb",compresslevel=9) as g: g.write(js.encode())
