@@ -11,7 +11,7 @@ Output: data/history_raw.json {pulled, since, hist: {nct: [{v, d, st, mods}, ...
         pull, newest last, at most 8 per trial. Cached per NCT + lastUpdate in data/history_cache/ (gitignored).
 Endpoint: https://clinicaltrials.gov/api/int/studies/{nct}/history (the registry's internal API; no key, ≤ 5 req/s here).
 """
-import datetime, gzip, json, os, sys, time, urllib.request
+import gzip, json, os, sys, time, urllib.request
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import diff as snapdiff
 
