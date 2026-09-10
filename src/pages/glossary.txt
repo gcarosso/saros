@@ -15,9 +15,9 @@ conf: Readout confidence, 0 to 100: a transparent rule-based score of how likely
 prior: Base-rate prior: the historical share of trials at this phase that advance to the next one, oncology versus non-oncology (Wong, Siah & Lo, 2019). The dossier also shows the cumulative probability of approval from this phase. A population average, not a view on this asset.
 vel: Registered enrollment divided by months from study start to primary completion. That span includes follow-up, so this is a schedule-density proxy, not observed recruitment speed.
 impact: How much attention a readout deserves: phase weight × the literature prior × company size (public float, i.e. tradability, not expected stock move) × whether the registry date is actual × a discount when many specialists already hold the name. Bucketed High, Med, Low.
-action: The next action from an ordered rule list (Pass, Wait, Review flow, Diligence, Size, Monitor). Hover a value for the rule that fired. Rules, not advice.
+action: The next step from an ordered rule list (Pass, Cash flag, Wait, Review flow, Diligence, Size, Monitor). Hover a value for the rule that fired. Rules, not advice.
 days: Days from today to the registered primary-completion date. Negative means the date has passed.
-readout: Registered primary-completion date. “A” = the sponsor reported it as actual rather than estimated. Month-only dates sit on the 15th. Red/green badge = moved since the previous snapshot.
+readout: Registered primary-completion date: when the last patient finishes the primary endpoint. It is not the date results are announced. “A” = the sponsor reported it as actual rather than estimated. Month-only dates sit on the 15th. Red/green badge = moved since the previous snapshot.
 mcap: Public float as reported to the SEC (dei EntityPublicFloat), a market-cap proxy for US filers; ex-US listings show none.
 n: Registered enrollment, planned or actual.
 sponsor: Lead sponsor, mapped to its group (e.g. Genentech → Roche). A dot marks large pharma; the badge is the ticker.

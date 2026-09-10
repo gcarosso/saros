@@ -53,10 +53,22 @@ def fmtd(d):
     except: return d
 for e in iss.values(): e["last_buy"]=fmtd(e["last_buy"]); e["last_sell"]=fmtd(e["last_sell"])
 si={}
+# FINRA Query API: GET returns CSV from 2020 onward; a POST with a settlement-date range returns JSON. Page the last 45 days
+# (about three settlements for every symbol) and keep the latest settlement per symbol; process.py picks the tickers it needs.
 try:
-    b=get("https://api.finra.org/data/group/otcMarket/name/consolidatedShortInterest?limit=5000&offset=0",60)
-    rows=json.loads(b); print("finra rows",len(rows),file=sys.stderr)
-    for r in rows: si[r.get("symbolCode","")]=r
+    import urllib.request
+    end=datetime.date.today(); start=end-datetime.timedelta(days=45); off=0; n=0
+    while True:
+        body=json.dumps({"limit":5000,"offset":off,"dateRangeFilters":[{"fieldName":"settlementDate","startDate":start.isoformat(),"endDate":end.isoformat()}]}).encode()
+        req=urllib.request.Request("https://api.finra.org/data/group/otcMarket/name/consolidatedShortInterest",data=body,headers={"Content-Type":"application/json","Accept":"application/json",**UA})
+        with urllib.request.urlopen(req,timeout=60) as r: rows=json.loads(r.read()); total=int(r.headers.get("record-total") or 0)
+        for r in rows:
+            k=r.get("symbolCode","")
+            if k and (k not in si or (r.get("settlementDate","")>si[k].get("settlementDate",""))): si[k]=r
+        n+=len(rows); off+=5000
+        if not rows or off>=total: break
+        time.sleep(0.2)
+    print("finra rows",n,"symbols",len(si),"window",start,end,file=sys.stderr)
 except Exception as e: print("finra short interest unavailable:",e,file=sys.stderr)
 json.dump({"pulled":time.strftime("%Y-%m-%dT%H:%M:%SZ",time.gmtime()),"quarters":got,"issuers":list(iss.values()),"short":si},open(os.path.join(OUT,"insiders_raw.json"),"w"))
 print("done",len(iss),got,len(si))

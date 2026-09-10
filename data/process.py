@@ -3,22 +3,22 @@
 import gzip,json,re,collections,datetime,os
 OUT=os.path.dirname(os.path.abspath(__file__))
 d=json.load(gzip.open(os.path.join(OUT,"ct_raw.json.gz"),"rt"))
+# first match wins: organ-system categories come before the rare/genetic catch-all (2026-09-09: pediatric IBS-C had filed under Rare via the bare word "syndrome")
 TA=[("Oncology",r"cancer|carcinoma|tumou?r|neoplasm|lymphoma|leukemia|leukaemia|myeloma|melanoma|sarcoma|glioma|glioblastoma|nsclc|sclc|metasta|oncolog|mesothelioma|myelodysplastic|myelofibrosis|blastoma|adenocarcinoma"),
 ("Nephrology & Urology",r"nephropathy|glomerul|\biga\b|\bigan\b|fsgs|lupus nephritis|nephrotic|alport|polycystic kidney|adpkd|nephro|overactive bladder|incontinence|urolog"),
 ("Cardiometabolic",r"diabet|obes|weight|cardio|heart failure|atrial|hypertens|coronary|myocardial|lipid|cholesterol|hypercholes|nash|mash|steatohepat|steatotic|kidney disease|ckd|renal|lp\(a\)|atheroscl|stroke|thromb|hypertriglycer"),
 ("Immunology & Inflammation",r"psoria|arthritis|lupus|crohn|colitis|dermatitis|atopic|asthma|copd|eosinophil|hidradenitis|alopecia|vitiligo|spondyl|sjogren|scleroderma|myasthenia|urticaria|inflammat|pemphig|uveitis|sarcoidosis|immune|autoimmun|celiac|prurigo|lichen"),
 ("Neuroscience",r"alzheimer|parkinson|schizophren|depress|bipolar|epilep|seizure|migraine|multiple sclerosis|neuropath|huntington|amyotrophic|als\b|dementia|cognitive|autism|adhd|anxiety|insomnia|narcolepsy|pain\b|tourette|ataxia|myotonic|duchenne|spinal muscular|neuro|psychiatr|ptsd|agitation|tardive|essential tremor|rett"),
-("Infectious Disease & Vaccines",r"vaccin|infection|influenza|covid|sars-cov|rsv|hiv|hepatitis|bacteri|pneumonia|tubercul|malaria|fung|candid|sepsis|urinary tract|cmv|cytomegalo|virus|viral|immunization|immunisation|pneumococc|meningococ|dengue|herpes|clostrid|gonorr|chlamyd"),
-("Rare & Genetic Disease",r"rare|orphan|deficien|syndrome|hemophilia|haemophilia|sickle|thalassemia|fabry|gaucher|pompe|amyloid|cystic fibrosis|dystroph|mucopolysacc|phenylketon|lysosomal|hereditary|congenital|genetic|angioedema|porphyria|achondroplasia|hypophosphat|primary biliary|myositis|pnh|paroxysmal|transthyretin|wilson"),
+("Infectious Disease & Vaccines",r"vaccin|infection|influenza|covid|sars-cov|rsv|hiv|hepatitis [abcde]\b|viral hepatitis|hbv\b|hcv\b|bacteri|pneumonia|tubercul|malaria|fung|candid|sepsis|urinary tract|cmv|cytomegalo|virus|viral|immunization|immunisation|pneumococc|meningococ|dengue|herpes|clostrid|gonorr|chlamyd"),
 ("Hematology",r"anemia|anaemia|thrombocytop|neutropen|hemat|haemat|von willebrand|itp\b|coagul|bleeding|iron"),
 ("Ophthalmology",r"macular|retin|glaucoma|ophthalm|ocular|eye|myopia|keratitis|dry eye|uveitis|cornea"),
 ("Respiratory",r"pulmonary|lung disease|bronchiect|idiopathic pulmonary|ipf\b|respiratory|cough|sleep apnea"),
-("Women's & Men's Health",r"endometrio|menopaus|contracep|fertil|ovarian insuff|uterine|pregnan|preterm|vasomotor|erectile|hypogonad|prostat"),
 ("Gastroenterology & Hepatology",r"gastro|liver|hepat|cirrhosis|bowel|constipat|ibs|eosinophilic esophagitis|pancreat|cholang|gerd|reflux"),
 ("Dermatology",r"acne|rosacea|wound|scar|hyperhidrosis|skin|dermat|onychomycosis"),
 ("Musculoskeletal & Pain",r"osteo|fracture|tendon|muscle|gout|back pain|fibromyalgia|arthro|joint"),
 ("Endocrinology",r"thyroid|growth hormone|cushing|acromegaly|adrenal|hypoparathyroid|endocrin|pubert"),
-("Nephrology & Urology",r"nephro|glomerul|iga nephropathy|bladder|incontinence|urolog|dialysis|lupus nephritis|fsgs"),
+("Women's & Men's Health",r"endometrio|menopaus|contracep|fertil|ovarian insuff|uterine|pregnan|preterm|vasomotor|erectile|hypogonad|prostat"),
+("Rare & Genetic Disease",r"rare disease|orphan|prader-willi|angelman|dravet|lennox|fragile x|down syndrome|turner syndrome|noonan|marfan|ehlers|hunter syndrome|hurler|sanfilippo|usher syndrome|bardet|smith-lemli|williams syndrome|digeorge|cdkl5|alpha-1 antitrypsin|enzyme deficien|lipase deficien|growth hormone deficien|hemophilia|haemophilia|sickle|thalassemia|fabry|gaucher|pompe|amyloid|cystic fibrosis|dystroph|mucopolysacc|phenylketon|lysosomal|hereditary|congenital|genetic|angioedema|porphyria|achondroplasia|hypophosphat|primary biliary|myositis|pnh|paroxysmal|transthyretin|wilson"),
 ("Allergy",r"allerg|anaphyla|peanut|food allergy")]
 MOD=[("Cell therapy",r"car-t|car t|cart\b|t-cell|t cell|til\b|nk cell|cell therapy|autologous|allogeneic|stem cell|mesenchymal|ipsc|tcr-t|tcr t"),
 ("Gene therapy / editing",r"gene therapy|aav|adeno-associated|crispr|gene editing|base edit|lentivir|gene transfer|exa-cel|vector"),
@@ -110,6 +110,27 @@ try:
         tk=tkidx.get(t); f=fin.get(str(tk["cik"]),{}) if tk else {}
         MANOUT[g]={"t":t,"ex":ex or (tk["ex"] if tk else ""),"cik":tk["cik"] if tk else None,"cash":f.get("cash"),"sti":f.get("sti"),"per":f.get("cash_per",""),"rd":f.get("rd"),"ni":f.get("ni"),"rev":f.get("rev"),"ocf":f.get("ocf"),"rdq":[f.get("rd_q1"),f.get("rd_q2")],"niq":[f.get("ni_q1"),f.get("ni_q2")],"flt":f.get("float"),"fltper":f.get("float_per",""),"sh":f.get("sh")}
     print("sec matched sponsors",len(SEC),"manual",len(MANOUT),"pulled",sec["pulled"])
+    # the issuer list for pull_facts.py (SEC companyfacts, one document per matched issuer)
+    seen={}
+    for v in list(SEC.values())+list(MANOUT.values()):
+        if v.get("cik") and v["cik"] not in seen: seen[v["cik"]]={"cik":v["cik"],"t":v["t"]}
+    json.dump(list(seen.values()),open(os.path.join(OUT,"matched_ciks.json"),"w"))
+    # companyfacts override: cash, every investment tag, debt, annualized year-to-date operating cash flow, shares, float
+    FACTS={}
+    try:
+        fr=json.load(open(os.path.join(OUT,"facts_raw.json"))); FACTS=fr.get("facts",{}); FACTS_PULLED=fr.get("pulled","")
+    except Exception: FACTS_PULLED=""
+    n_over=0
+    for v in list(SEC.values())+list(MANOUT.values()):
+        f=FACTS.get(str(v.get("cik")))
+        if not f or f.get("cash") is None: continue
+        v.update({"cash":f["cash"],"sti":f.get("inv"),"per":f.get("cash_per"),"cashtag":f.get("cash_tag"),"invtags":f.get("inv_tags"),"debt":f.get("debt"),"debttags":f.get("debt_tags"),
+                  "ocfq":f.get("ocf_run"),"ocfper":f.get("ocf_per"),"ocfm":f.get("ocf_months"),"filed":f.get("filed")})
+        if f.get("ocf_fy") is not None: v["ocf"]=f["ocf_fy"]; v["ocfper_fy"]=f.get("ocf_fy_per")
+        if f.get("sh"): v["sh"]=f["sh"]
+        if f.get("flt"): v["flt"]=f["flt"]; v["fltper"]=f.get("flt_per","")
+        n_over+=1
+    print("companyfacts override",n_over,"issuers","pulled",FACTS_PULLED)
 except Exception as e:
     print("SEC join skipped:",e); MANOUT={}
 # Regulatory calendar: company-disclosed PDUFA / AdCom / resubmission dates from SEC EDGAR full-text search (pull_pdufa.py)
@@ -182,6 +203,7 @@ try:
         INSD["pulled"]=j["pulled"]; INSD["quarters"]=j["quarters"]; INSD["short"]=j.get("short",{})
         need_cik={str(v["cik"]) for v in list(SEC.values())+list(MANOUT.values()) if v.get("cik")}
         need_tk={v["t"] for v in list(SEC.values())+list(MANOUT.values())}|{r["ticker"] for r in REG["rows"] if r.get("ticker")}
+        INSD["short"]={k:v for k,v in INSD["short"].items() if k in need_tk}   # FINRA returns every symbol; keep the matched issuers only
         for e in j["issuers"]:
             e={k:e.get(k) for k in ("cik","name","tk","buy_n","buy_usd","sell_n","sell_usd","buyers","last_buy","last_sell","own10_buy_usd","own10_sell_usd")}
             e["buy_usd"]=round(e["buy_usd"]); e["sell_usd"]=round(e["sell_usd"])
@@ -288,7 +310,21 @@ if os.path.exists(pp):
                "changed":[{"id":i,**c} for i,c in ch.items()]},open(hp,"w"),separators=(",",":"))
     print("diff vs",DIFF["prev_pulled"][:10],{k:v for k,v in summ.items() if k not in("new","gone")},"new",len(summ["new"]),"gone",len(summ["gone"]),"→",os.path.basename(hp))
 else: print("no prev_snapshot.json.gz — diff skipped")
-snap={"meta":{"pulled":d["pulled"],"ct_query":d["query"],"n_trials":len(rows),"n_fda":len(fda),"built":datetime.datetime.utcnow().isoformat()+"Z"},"trials":rows,"fda":fda,"longevity":LV,"sec":SEC,"secman":MANOUT,"reg":REG,"f13":F13,"ins":INSD,"formd":FD,"nih":NIH,"diff":DIFF,"sec_pulled":sec.get("pulled","") if SEC else ""}
+# per-loader status: what was pulled when, and how many rows made it in; the Method tab shows this table and refresh writes it to data/status.json
+try: _fp=FACTS_PULLED
+except NameError: _fp=""
+STATUS={"trials":{"pulled":d["pulled"],"rows":len(rows),"source":"ClinicalTrials.gov API v2"},
+        "fda":{"pulled":(f.get("pulled","") if isinstance(f,dict) else ""),"rows":len(fda),"source":"openFDA Drugs@FDA"},
+        "sec":{"pulled":(sec.get("pulled","") if SEC else ""),"rows":len(SEC)+len(MANOUT),"source":"SEC company tickers + XBRL frames"},
+        "facts":{"pulled":_fp,"rows":len(FACTS) if SEC else 0,"source":"SEC XBRL companyfacts per matched issuer"},
+        "reg":{"pulled":REG.get("pulled",""),"rows":len(REG.get("rows",[])),"source":"SEC EDGAR full-text search (PDUFA / AdCom / resubmission)"},
+        "f13":{"pulled":F13.get("pulled",""),"rows":len(F13.get("funds",[])),"source":"SEC 13F-HR information tables"},
+        "ins":{"pulled":INSD.get("pulled",""),"rows":len(INSD.get("byTk",{})),"source":"SEC insider-transactions data sets"},
+        "short":{"pulled":INSD.get("pulled",""),"rows":len(INSD.get("short",{})),"source":"FINRA consolidated short interest"},
+        "formd":{"pulled":FD.get("pulled",""),"rows":len(FD.get("issuers",{})),"source":"SEC Form D data sets"},
+        "nih":{"pulled":NIH.get("pulled",""),"rows":len(NIH.get("orgs",{})),"source":"NIH RePORTER"}}
+json.dump({"built":datetime.datetime.utcnow().isoformat()+"Z","loaders":STATUS},open(os.path.join(OUT,"status.json"),"w"),indent=1)
+snap={"meta":{"pulled":d["pulled"],"ct_query":d["query"],"n_trials":len(rows),"n_fda":len(fda),"built":datetime.datetime.utcnow().isoformat()+"Z"},"status":STATUS,"trials":rows,"fda":fda,"longevity":LV,"sec":SEC,"secman":MANOUT,"reg":REG,"f13":F13,"ins":INSD,"formd":FD,"nih":NIH,"diff":DIFF,"sec_pulled":sec.get("pulled","") if SEC else ""}
 js=json.dumps(snap,separators=(",",":"),ensure_ascii=False)
 open(os.path.join(OUT,"snapshot.json"),"w").write(js)
 with gzip.open(os.path.join(OUT,"snapshot.json.gz"),"wb",compresslevel=9) as g: g.write(js.encode())

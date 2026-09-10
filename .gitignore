@@ -1,25 +1,34 @@
-# generated artifacts and pulled data — regenerate with `make pull && make process && make build`
-dist/
-saros.html
-readout-radar.html
-data/*.json
-data/*.json.gz
-data/formd_cache/
-data/history/
+# raw pulls are large and re-creatable
+data/ct_raw.json.gz
+data/fda_raw.json.gz
+data/sec_raw.json
+data/f13_raw.json
+data/insiders_raw.json
+data/snapshot.json
+data/snapshot.json.gz
 data/*.log
-data/*.tar.gz
-data/bpc_raw_sample.json
+data/_to_delete/
+dist/
+readout-radar-src.tar.gz
+data/readout-radar-src.tar.gz
+# subscription-derived (keep private). NOTE: bpc_full.json.gz / bpc_archive are the ONLY copy of a
+# cancelled subscription's data — they are git-ignored, so back them up outside the repo (Time Machine,
+# a private bucket, an external disk). Do not delete on a clean checkout.
+data/bpc_calendar.json
+data/pdufa.json
+data/bpc_full.json.gz
+data/bpc_archive/
+# source PDFs
+*.pdf
+.DS_Store
 # local tooling
 .venv/
 __pycache__/
-.pytest_cache/
-.ruff_cache/
 .claude/
-.DS_Store
-# never in a public repo
-*.pdf
-context/
-design-inspo/
-grok-spec-dashboard/
-bpc_private/
-*.egg-info/
+data/formd_cache/
+data/formd_raw.json
+data/nih_raw.json
+# companyfacts layer (re-creatable; facts_cache is one JSON per matched issuer, refreshed every 6 days)
+data/facts_cache/
+data/facts_raw.json
+data/matched_ciks.json

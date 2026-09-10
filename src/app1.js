@@ -83,7 +83,8 @@ function listing(sec){if(!sec)return'No SEC equity match';if(sec.t==='private')r
 /* runway = (cash + short-term investments) / annual burn. Burn is FY operating cash outflow where XBRL reports it (basis 'ocf');
    otherwise the annualised net loss, an accounting proxy that the UI labels as such (basis 'niq' / 'ni'). Missing inputs → null, never 0. */
 function runway(sec){if(!sec||sec.cash==null)return null;const cash=(sec.cash||0)+(sec.sti||0);let burn=null,basis=null;
-  if(sec.ocf!=null){burn=-sec.ocf;basis='ocf';}
+  if(sec.ocfq!=null){burn=-sec.ocfq;basis='ocfq';}   /* annualized year-to-date operating cash flow from companyfacts, same filing as the cash */
+  else if(sec.ocf!=null){burn=-sec.ocf;basis='ocf';}
   else{const q=(sec.niq||[]).filter(x=>x!=null);if(q.length){burn=-q.reduce((a,b)=>a+b,0)/q.length*4;basis='niq';}else if(sec.ni!=null){burn=-sec.ni;basis='ni';}}
   if(burn==null)return null;if(burn<=0)return{cash,burn,yrs:Infinity,basis};return{cash,burn,yrs:cash/burn,basis};}
 function enrich(){
@@ -153,7 +154,9 @@ function decide(t){
   const stopped=['TERMINATED','WITHDRAWN','SUSPENDED'].includes(t.st);
   t.rel=stopped?'stopped':t.pct==='ACTUAL'?'firm':(t.slip>=1&&!t.frm)?'slipped':'estimated';
   t.m2e=t.days>0?t.days/30.4:0;
-  const profitable=t.tier==='Large pharma'||!!(t.sec&&(t.sec.ocf!=null?t.sec.ocf>0:(t.sec.ni||0)>0));   /* cash-generative on the reported basis; revenue alone proves nothing */
+  const gen=!!(t.sec&&(t.sec.ocfq!=null?t.sec.ocfq>0:t.sec.ocf!=null?t.sec.ocf>0:(t.sec.ni||0)>0));   /* cash-generative on the reported basis; revenue alone proves nothing */
+  const profitable=t.tier==='Large pharma'||gen;
+  t.cashNote=t.tier==='Large pharma'?'cash test not applied: large pharma':gen?'cash test not applied: operating cash flow positive':(t.sec&&t.sec.cash!=null?null:'cash test not applied: no SEC financials');
   t.cashm=profitable?null:(t.sec?((r=>r&&isFinite(r.yrs)?r.yrs*12:null)(runway(t.sec))):null);
   t.binding=t.cashm!=null&&t.days>0&&t.cashm<t.m2e;
   const loa=t.pri;const mc=t.mcap;
@@ -163,7 +166,7 @@ function decide(t){
   t.impact=PH_W[t.ph]*(0.5+loa)*size*firm*crowd;t.impactB=t.impact>=.62?'High':t.impact>=.35?'Med':'Low';
   let a,why;
   if(stopped){a='Pass';why='study stopped';}
-  else if(t.binding){a='Pass / hedge';why=`cash ${Math.round(t.cashm)} mo < ${Math.round(t.m2e)} mo to readout`;}
+  else if(t.binding){a='Cash flag';why=`cash ${Math.round(t.cashm)} mo < ${Math.round(t.m2e)} mo to primary completion`;}
   else if(t.days<0&&t.pct!=='ACTUAL'){a='Wait';why='completion date passed, still estimated';}
   else if(t.rel==='estimated'&&t.days<=90){a='Wait';why='date unconfirmed inside 90 d';}
   else if(t.rel==='slipped'){a='Wait';why=`date slipped ${t.slip} mo since last snapshot`;}

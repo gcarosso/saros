@@ -5,7 +5,7 @@ export PATH := /opt/homebrew/bin:$(PATH)
 DATA = data
 SNAP = $(DATA)/snapshot.json.gz
 
-.PHONY: all pull pull-trials pull-sec pull-13f pull-insiders pull-pdufa pull-pdufa-full pull-formd pull-nih rotate process build test serve clean refresh install-launchd uninstall-launchd
+.PHONY: all pull pull-trials pull-facts pull-sec pull-13f pull-insiders pull-pdufa pull-pdufa-full pull-formd pull-nih rotate process build test serve clean refresh install-launchd uninstall-launchd
 
 all: process build
 
@@ -25,6 +25,8 @@ pull-pdufa-full:
 	cd $(DATA) && $(PY) pull_pdufa.py
 pull-formd:       ## SEC Form D quarterly data sets → formd_raw.json (cached per quarter; ≈1 min after the first run)
 	cd $(DATA) && $(PY) pull_formd.py
+pull-facts:       ## SEC XBRL companyfacts for every matched issuer (needs matched_ciks.json from process; ≈2 min, cached 6 days)
+	cd $(DATA) && $(PY) pull_facts.py
 pull-nih:         ## NIH RePORTER awards for venture-tail sponsors + longevity cohort → nih_raw.json (cached per name; new names only)
 	cd $(DATA) && $(PY) pull_nih.py
 
@@ -47,6 +49,8 @@ refresh:          ## weekly job: pull → process → build → test (≈8 min);
 	@echo "== refresh start $$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 	$(MAKE) pull
 	$(MAKE) rotate
+	$(MAKE) process
+	$(MAKE) pull-facts
 	$(MAKE) process
 	$(MAKE) build
 	$(MAKE) test
