@@ -35,3 +35,8 @@ data/matched_ciks.json
 data/subs_cache/
 data/subs_raw.json
 data/prices_raw.json
+data/history_cache/
+data/history_raw.json
+data/guidance_raw.json
+data/changes.json
+data/changes.xml

@@ -12,7 +12,7 @@ const App={tab:'cal',tlMode:'ph',calSort:['pd',1],calPage:0,calDense:0,spN:25,fd
     $('#st-diff').innerHTML=DIFF.prev_pulled?`Δ vs ${DIFF.prev_pulled.slice(0,10)} <b>${DIFF.slipped}</b> slipped · <b>${DIFF.firmed}</b> firmed · <b>${(DIFF.new||[]).length}</b> new`:'';
     $('#loading').style.display='none';
     if(['#about','#visuals','#sector'].includes(location.hash))Sheet.open(location.hash.slice(1));
-    const hm=location.hash.match(/^#(tab|t|s)=(.+)$/);if(hm){const v=decodeURIComponent(hm[2]);if(hm[1]==='tab')App.setTab(v);else if(hm[1]==='t')Dossier.open(v);else if(hm[1]==='s'){F.grp=v;App.update();App.setTab('spon');}}
+    const hm=location.hash.match(/^#(tab|t|s|c)=(.+)$/);if(hm){const v=decodeURIComponent(hm[2]);if(hm[1]==='tab')App.setTab(v);else if(hm[1]==='t')Dossier.open(v);else if(hm[1]==='c')Company.open(v);else if(hm[1]==='s'){F.grp=v;App.update();App.setTab('spon');}}
     console.log('%cSAROS%c boot '+(performance.now()-t0).toFixed(0)+' ms · '+T.length+' trials','font-weight:600;color:#63a9ff','color:#8b93a1');
   },
   buildRail(){
@@ -132,7 +132,7 @@ const App={tab:'cal',tlMode:'ph',calSort:['pd',1],calPage:0,calDense:0,spN:25,fd
       <td class="num"><span class="dtr${t.days<0?' past':t.days<=90?' soon':''}">${t.days>=0?'+':''}${t.days}</span></td>
       <td><span class="tag ${PH_CLS[t.ph]}">${t.ph}</span></td>
       <td class="wrap"><span class="ttl" title="${esc(t.t)}">${esc(t.ac?t.ac+' — ':'')}${esc(t.t)}</span><span class="dim2 mono" style="font-size:10px">${t.id} · ${esc(t.iv.filter(x=>x[0]!=='OTHER').slice(0,2).map(x=>x[1]).join(' + ')||'—')}${t.moa&&t.moa.length?` <span style="color:var(--acc);opacity:.85">· ${esc(t.moa.slice(0,2).join(' · '))}</span>`:''}</span></td>
-      <td><span class="sponsor${t.tier==='Large pharma'?' big':''}" title="${esc(t.sp)}">${esc(t.grp)}</span>${t.sec&&t.sec.t!=='private'?` <span class="badge" style="font-size:9.5px">${esc(t.sec.t)}</span>`:''}</td>
+      <td><span class="sponsor${t.tier==='Large pharma'?' big':''}" title="${esc(t.sp)}">${esc(t.grp)}</span>${t.sec&&t.sec.t!=='private'?` <span class="badge co" style="font-size:9.5px;cursor:pointer" title="Company page" onclick="event.stopPropagation();Company.open('${esc(t.sec.t)}')">${esc(t.sec.t)}</span>`:''}</td>
       <td class="wrap" style="max-width:220px"><span class="ttl" style="max-width:220px" title="${esc(t.c.join(' · '))}">${esc(t.c[0]||'—')}</span></td>
       <td><span class="dim">${esc(t.ta)}</span></td><td><span class="dim">${esc(t.mo)}</span></td>
       <td><span class="st ${t.st}"><i></i>${ST_LBL[t.st]||t.st}</span></td>
@@ -185,8 +185,9 @@ const App={tab:'cal',tlMode:'ph',calSort:['pd',1],calPage:0,calDense:0,spN:25,fd
     const mv=App.vec(mine);const groups=new Map();T.forEach(t=>{if(t.grp!==F.grp){(groups.get(t.grp)||groups.set(t.grp,[]).get(t.grp)).push(t);}});
     const peers=[];groups.forEach((rows,g)=>{if(rows.length>=3)peers.push([g,App.cos(mv,App.vec(rows)),rows.length,rows.filter(t=>t.ph==='P3').length]);});peers.sort((a,b)=>b[1]-a[1]);
     const stopped=mine.filter(t=>['TERMINATED','WITHDRAWN','SUSPENDED'].includes(t.st)).length;
-    $('#prog-title').textContent=F.grp;
+    $('#prog-title').textContent=F.grp;const tk0=(mine.find(t=>t.sec&&t.sec.t!=='private')||{}).sec;
     el.innerHTML=`<div class="kv" style="grid-template-columns:1fr auto"><span class="k">Trials in window</span><span class="v num">${mine.length}</span><span class="k">Pivotal (P3) share</span><span class="v num">${Math.round(p3.length/mine.length*100)}%</span><span class="k">Readouts next 12 mo</span><span class="v num">${n12.length} <span class="dim2">(${n12.filter(t=>t.ph==='P3').length} P3)</span></span><span class="k">Median P3 confidence</span><span class="v num">${median(p3.map(t=>t.conf))||'—'}</span><span class="k">Stopped in window</span><span class="v num">${stopped} <span class="dim2">${mine.length?Math.round(stopped/mine.length*100)+'%':''}</span></span><span class="k">Enrollment</span><span class="v num">${fmtN(sum(mine,t=>t.n))}</span><span class="k">Breadth</span><span class="v">${tas.length} areas · ${mos.length} modalities</span>${secRow(mine[0]&&mine[0].sec,mine.length)}${mine[0]&&mine[0].own?`<span class="k">Specialist holders</span><span class="v num">${mine[0].own.n} <span class="dim2">· ${fmtUSD(mine[0].own.value)}${mine[0].own.ng?' · +'+mine[0].own.ng+' generalist':''}</span></span>`:''}</div>
+      ${tk0?`<div style="margin:6px 0"><button class="btn sm" onclick="Company.open('${esc(tk0.t)}')">Company page · ${esc(tk0.t)}</button></div>`:''}
       <div class="sec"><h4>Program mix</h4>${tas.slice(0,5).map(([k,n])=>`<div class="meter" style="grid-template-columns:150px 1fr auto"><span class="dim" style="font-size:11.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(k)}</span><div class="tr"><i style="width:${n/mine.length*100}%;background:${taColor(k)}"></i></div><span class="v">${n}</span></div>`).join('')}</div>
       <div class="sec"><h4>Closest scientific peers <span class="dim2" style="text-transform:none;letter-spacing:0">· cosine on area × phase × modality</span></h4><div class="related">${peers.slice(0,8).map(([g,s,n,p])=>`<button onclick="F.grp='${esc(g).replace(/'/g,"\\'")}';App.update()"><span class="num" style="color:var(--acc);width:34px">${(s*100).toFixed(0)}</span><span class="ttl">${esc(g)}</span><span class="num dim2">${n} · ${p} P3</span></button>`).join('')||'<span class="dim2">No peers with ≥3 trials.</span>'}</div></div>
       ${(()=>{const f=mine.find(t=>t.fdi),n=mine.find(t=>t.nihi);return (f||n)?privateSection(f&&f.fdi,n&&n.nihi,F.grp):'';})()}
@@ -363,8 +364,10 @@ const Dossier={cur:null,
         <div class="ivl" style="margin-top:8px">${t.iv.map((i,k)=>`<div><span class="ty">${esc(i[0])}</span><span>${esc(i[1])}${t.ivd&&t.ivd[k]&&t.ivd[k]!==i[1]?`<br><span class="dim" style="font-size:11px">${esc(t.ivd[k])}</span>`:''}</span></div>`).join('')||'—'}</div>
         <div id="moa-ai" style="margin-top:8px"></div></div>
       <div class="sec"><h4>Sponsor</h4><div class="kv"><span class="k">Lead</span><span class="v">${esc(t.sp)}${t.grp!==t.sp?` <span class="dim2">→ ${esc(t.grp)}</span>`:''}</span>${t.co.length?`<span class="k">Collaborators</span><span class="v">${esc(t.co.join(' · '))}</span>`:''}<span class="k">Tier / domicile</span><span class="v">${esc(t.tier)} · ${esc(t.dom)}</span>${secRow(t.sec)}${t.lv?`<span class="k">Longevity company</span><span class="v">${esc(t.lv)} · <button class="btn sm" style="height:20px" onclick="App.setTab('lv')">Longevity tab ↗</button></span>`:''}</div></div>
+      ${guidanceSection(t.sec)}
       ${filingsSection(t.sec)}
       ${privateSection(t.fdi,t.nihi,t.sp)}
+      ${historySection(t)}
       <div class="sec"><h4>Conditions &amp; keywords</h4><div class="summ">${esc(t.c.join(' · '))}${t.k.length?`<br><span class="dim2">${esc(t.k.join(' · '))}</span>`:''}</div></div>
       <div class="sec"><h4>Registry</h4><div class="kv"><span class="k">First posted</span><span class="v num">${fmtD(t.fp)}</span><span class="k">Last update</span><span class="v num">${fmtD(t.lu)} <span class="${stale>365?'dim':'dim2'}">· ${stale} d ago</span></span><span class="k">Results posted</span><span class="v">${t.hr?'yes':'no'}</span><span class="k">FDA-regulated drug</span><span class="v">${t.fda?'yes':'not flagged'}</span>${t.ws?`<span class="k">Why stopped</span><span class="v">${esc(t.ws)}</span>`:''}</div></div>
       ${t.sum?`<div class="sec"><h4>Summary</h4><div class="summ">${esc(t.sum)}${t.sum.length>=400?'…':''}</div></div>`:''}
@@ -540,6 +543,43 @@ function insSection(t){
     ${si?`<span class="k">Short interest</span><span class="v num">${fmtN(+si.currentShortPositionQuantity||0)} sh <span class="dim2">· ${si.daysToCoverQuantity?(+si.daysToCoverQuantity).toFixed(1)+' days to cover · ':''}${esc(si.settlementDate||'')}</span></span>`:''}</div>
     <div class="dim2" style="font-size:10.5px">Code P/S non-derivative transactions by officers and directors; 10%-owner trades (tenders, fund top-ups) are shown separately and excluded from the buy signal. Excludes option exercises, grants and 10b5-1 context. Sells by insiders are routine; clustered buys are the signal.</div></div>`;
 }
+/* ---------- company-guided milestones (8-K / 6-K sentences with a period) ---------- */
+const MS_LBL={readout:'Readout',enrollment:'Enrollment',start:'Start',milestone:'Milestone'};
+function guidanceRows(tk){return ((DATA.guid||{}).rows||[]).filter(r=>r.ticker===tk).sort((a,b)=>a.date<b.date?-1:1);}
+function guidanceSection(sec){
+  if(!sec||!sec.t)return '';const g=guidanceRows(sec.t);if(!g.length)return '';
+  return `<div class="sec"><h4 data-gl="guid">Company-guided milestones <span class="dim2" style="text-transform:none;letter-spacing:0">· ${esc(sec.t)} · 8-K / 6-K sentences, trailing 120 days · ${g.length}</span></h4>${g.slice(0,6).map(r=>{const dd=Math.round((new Date(r.date+'T00:00:00')-TODAY)/864e5);return `<div class="kv" style="grid-template-columns:110px 1fr;margin:4px 0 8px"><span class="k"><span class="num">${fmtD(r.date)}</span>${r.precision!=='day'?' <span class="badge" title="'+esc(r.precision)+'-precision statement; shown at the period end">≈</span>':''}</span><span class="v"><span class="badge">${MS_LBL[r.milestone]||r.milestone}</span> <span class="dtr${dd<0?' past':dd<=45?' soon':''}">${dd>=0?'+':''}${dd} d</span>${r.asset?` · ${esc(r.asset)}`:''}<br><span class="dim2" style="font-size:11px">${esc(r.form||'filing')} filed ${fmtD(r.filed)} · <a href="${esc(r.source)}" target="_blank" rel="noopener">source ↗</a></span><div class="quote" title="${esc(r.sentence)}">${esc(r.sentence)}</div></span></div>`;}).join('')}${g.length>6?`<div class="dim2" style="font-size:11px">${g.length-6} more on the company page.</div>`:''}</div>`;
+}
+/* ---------- registry version history for changed trials ---------- */
+function historySection(t){
+  const h=t.hist;if(!h||!h.length)return '';const since=DATA.hist_since||'';
+  return `<div class="sec"><h4 data-gl="hist">Registry versions <span class="dim2" style="text-transform:none;letter-spacing:0">· ${h.length} since the ${esc(since)} snapshot · ClinicalTrials.gov history</span></h4>${h.map(v=>`<div class="fl"><span class="num dim2">${esc(v.d)}</span> <span class="badge">v${v.v}</span> <span class="dim">${esc((v.mods||[]).join(' · ')||'no module label')}</span>${v.st!==t.st?` <span class="dim2">· ${esc(ST_LBL[v.st]||v.st)}</span>`:''}</div>`).join('')}<div class="dim2" style="font-size:10.5px;margin-top:4px">Module labels are what the sponsor edited; an "Outcome Measures" edit is not by itself an endpoint change — compare the before/after text above.</div></div>`;
+}
+/* ---------- company page: one view per ticker, in the dossier drawer ---------- */
+const Company={cur:null,
+  find(tk){const all=Object.values(DATA.sec||{}).concat(Object.values(DATA.secman||{}));return all.find(s=>s&&s.t===tk)||null;},
+  open(tk){const sec=Company.find(tk);if(!sec){toast('No company record for '+tk);return;}Tip.hide();Dossier.cur=null;Company.cur=tk;
+    const mine=T.filter(x=>x.sec&&x.sec.t===tk).sort((a,b)=>a.pd-b.pd);const t0=mine[0]||null;const grp=t0?t0.grp:tk;const name=(sec.name||grp);
+    const el=$('#dossier');el.classList.add('open');
+    $('#d-eye').innerHTML=`<span class="badge co">${esc(tk)}</span> · ${esc(listing(sec))}${sec.ex?' · '+esc(sec.ex):''}${sec.cik?` · <span class="mono">CIK ${sec.cik}</span>`:''}`;
+    $('#d-title').textContent=name;
+    const p3=mine.filter(x=>x.ph==='P3').length,next=mine.find(x=>x.days>=0);
+    $('#d-tags').innerHTML=`<span class="flag">${mine.length} trial${mine.length===1?'':'s'} in window</span>${p3?`<span class="flag">${p3} Phase 3</span>`:''}${next?`<span class="flag">next primary completion ${fmtD(next.pcd)}</span>`:''}${t0?`<span class="flag">${esc(t0.tier)}</span>`:''}`;
+    const link=location.origin+location.pathname+'#c='+encodeURIComponent(tk);
+    const programs=mine.length?`<div class="sec"><h4>Programs by primary completion</h4><div class="related">${mine.slice(0,40).map(x=>`<button onclick="Dossier.open('${x.id}')"><span class="num dim2">${fmtD(x.pcd)}</span><span class="tag ${PH_CLS[x.ph]}">${x.ph}</span><span class="ttl">${esc(x.ac||x.c[0]||x.t)}</span><span class="act ${x.flagClass}" style="font-size:11px">${esc(x.action)}</span></button>`).join('')}${mine.length>40?`<div class="dim2" style="font-size:11px">${mine.length-40} more — use "Sponsor's trials".</div>`:''}</div></div>`:'';
+    $('#d-body').innerHTML=`
+      <div style="display:flex;gap:8px;margin-bottom:6px;flex-wrap:wrap"><button class="btn sm" onclick="F.q='${esc(grp).replace(/'/g,"\\'")}';document.getElementById('q').value=F.q;App.update();Dossier.close()">Sponsor's trials</button><button class="btn sm" onclick="F.grp='${esc(grp).replace(/'/g,"\\'")}';App.update();App.setTab('spon');Dossier.close()">Programs &amp; peers</button>${sec.cik?`<a class="btn sm" href="https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=${sec.cik}&type=&dateb=&owner=include&count=40" target="_blank" rel="noopener">EDGAR ↗</a>`:''}<button class="btn sm" onclick="navigator.clipboard&&navigator.clipboard.writeText('${link}').then(()=>toast('Link copied'))">Copy link</button></div>
+      <div class="sec"><h4>Financials <span class="dim2" style="text-transform:none;letter-spacing:0">· SEC company facts${sec.filed?' · filed '+esc(sec.filed):''}</span></h4><div class="kv">${secRow(sec,mine.length)}</div>${t0&&t0.cashNote?`<div class="dim2" style="font-size:11px">${esc(t0.cashNote)}</div>`:''}</div>
+      ${programs}
+      ${t0?regSection(t0):''}
+      ${guidanceSection(sec)}
+      ${filingsSection(sec)}
+      ${t0?ownSection(t0):''}
+      ${t0?insSection(t0):''}
+      ${t0&&(t0.fdi||t0.nihi)?privateSection(t0.fdi,t0.nihi,name):''}
+      <div class="dim2" style="font-size:10.5px;margin-top:10px">Every figure above names its filing, period and source; a blank means no public record was matched, not that none exists.</div>`;
+    el.scrollTop=0;applyGloss(el);bindTips(el);}
+};
 /* ---------- filings since the balance sheet (SEC submissions) ---------- */
 const FORM_LBL={fin:'Financing',own:'Ownership','8k':'8-K',proxy:'Proxy',report:'Report'};
 function filingsSection(sec){
@@ -553,7 +593,7 @@ function filingsSection(sec){
 /* ---------- SEC financial row ---------- */
 function secRow(sec,nTrials){
   if(!sec||sec.t==='private')return `<span class="k">Listing</span><span class="v dim">unlisted / private</span>`;
-  const rw=runway(sec);let out=`<span class="k">Listing</span><span class="v"><span class="badge">${esc(sec.t)}</span> <span class="dim2">${esc(sec.ex||'')}</span></span>`;
+  const rw=runway(sec);let out=`<span class="k">Listing</span><span class="v"><span class="badge co" style="cursor:pointer" title="Company page" onclick="Company.open('${esc(sec.t)}')">${esc(sec.t)}</span> <span class="dim2">${esc(sec.ex||'')}</span> <button class="btn sm" style="height:18px;margin-left:6px" onclick="Company.open('${esc(sec.t)}')">Company page</button></span>`;
   if(sec.px)out+=`<span class="k">Last close</span><span class="v num">$${sec.px.toLocaleString(undefined,{maximumFractionDigits:2})} <span class="dim2">${esc(sec.pxd||'')} · ${esc(sec.pxsrc||'')} quote, unofficial${sec.mcap?' · market cap '+fmtUSD(sec.mcap)+' at '+fmtN(sec.sh)+' shares':''}</span></span>`;
   else if(sec.flt)out+=`<span class="k">Public float</span><span class="v num">${fmtUSD(sec.flt)} <span class="dim2">SEC cover page${sec.fltper?' · '+esc(String(sec.fltper)):''} · no quote available</span></span>`;
   if(rw&&rw.cash){const per=sec.per?String(sec.per).replace('CY','').replace('I',''):'';

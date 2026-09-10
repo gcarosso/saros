@@ -10,7 +10,7 @@ Used by process.py (which writes the results into snapshot.json) and by tests/te
 """
 
 STOPPED = ("TERMINATED", "WITHDRAWN", "SUSPENDED")
-FIELDS = (("pcd", "primary completion"), ("pct", "date type"), ("st", "status"), ("n", "enrollment"), ("ws", "why stopped"))
+FIELDS = (("pcd", "primary completion"), ("pct", "date type"), ("st", "status"), ("n", "enrollment"), ("ws", "why stopped"), ("po", "primary outcome text"))
 
 
 def is_placeholder(pcd, pct):

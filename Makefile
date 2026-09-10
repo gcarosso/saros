@@ -5,7 +5,7 @@ export PATH := /opt/homebrew/bin:$(PATH)
 DATA = data
 SNAP = $(DATA)/snapshot.json.gz
 
-.PHONY: all pull pull-trials pull-facts pull-subs pull-prices pull-sec pull-13f pull-insiders pull-pdufa pull-pdufa-full pull-formd pull-nih rotate process build test serve clean refresh install-launchd uninstall-launchd
+.PHONY: all pull pull-trials pull-facts pull-subs pull-prices pull-history pull-guidance daily pull-sec pull-13f pull-insiders pull-pdufa pull-pdufa-full pull-formd pull-nih rotate process build test serve clean refresh install-launchd uninstall-launchd
 
 all: process build
 
@@ -31,6 +31,10 @@ pull-subs:        ## SEC EDGAR submissions per matched issuer (filings since the
 	cd $(DATA) && $(PY) pull_submissions.py
 pull-prices:      ## last close per matched US ticker (Yahoo chart / Nasdaq quote, unofficial; once per day)
 	cd $(DATA) && $(PY) pull_prices.py
+pull-history:     ## ClinicalTrials.gov version history for trials changed since the weekly baseline (needs snapshot + prev_snapshot)
+	cd $(DATA) && $(PY) pull_history.py
+pull-guidance:    ## company-guided milestones from 8-K / 6-K via EDGAR full-text search, trailing 120 days (≈10 min)
+	cd $(DATA) && $(PY) pull_guidance.py
 pull-nih:         ## NIH RePORTER awards for venture-tail sponsors + longevity cohort → nih_raw.json (cached per name; new names only)
 	cd $(DATA) && $(PY) pull_nih.py
 
@@ -57,11 +61,27 @@ refresh:          ## weekly job: pull → process → build → test (≈8 min);
 	$(MAKE) pull-facts
 	$(MAKE) pull-subs
 	$(MAKE) pull-prices
+	$(MAKE) pull-guidance
+	$(MAKE) pull-history
 	$(MAKE) process
 	$(MAKE) build
 	$(MAKE) test
 	$(MAKE) publish
 	@echo "== refresh done  $$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+
+daily:            ## daily job: registry + regulatory + filings + prices deltas against the weekly baseline (no rotate); what the daily launchd job runs
+	@echo "== daily start $$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+	$(MAKE) pull-trials
+	$(MAKE) pull-pdufa
+	$(MAKE) pull-subs
+	$(MAKE) pull-prices
+	$(MAKE) process
+	$(MAKE) pull-history
+	$(MAKE) process
+	$(MAKE) build
+	$(MAKE) test
+	$(MAKE) publish
+	@echo "== daily done  $$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 
 # The built dashboard is served from the one-commit repo saros-dist (Cloudflare Pages → saros.gcarosso.bio).
 # publish replaces that commit and force-pushes, so the hosting repo never grows.
@@ -69,18 +89,24 @@ DIST_REPO ?= $(firstword $(wildcard $(CURDIR)/../saros-dist $(CURDIR)/../../saro
 publish: dist/saros.html
 	@test -n "$(DIST_REPO)" || (echo "saros-dist checkout not found next to this repo"; exit 1)
 	cp dist/saros.html $(DIST_REPO)/index.html
+	cp data/changes.json data/changes.xml data/status.json $(DIST_REPO)/ 2>/dev/null || true
 	cd $(DIST_REPO) && git add -A && git commit -q --amend -m "SAROS build $$(date -u +%Y-%m-%d)" && git push -q --force-with-lease && echo "published $$(date -u +%Y-%m-%d) → saros.gcarosso.bio"
 
 PLIST = com.readoutradar.refresh
+PLIST_DAILY = com.readoutradar.daily
 install-launchd:  ## schedule `make refresh` Mondays 06:00 local (Pacific on this Mac); no credentials needed
 	mkdir -p ~/Library/LaunchAgents
 	sed 's|__REPO__|$(CURDIR)|g' launchd/$(PLIST).plist > ~/Library/LaunchAgents/$(PLIST).plist
 	launchctl bootout gui/$$(id -u)/$(PLIST) 2>/dev/null || true
 	launchctl bootstrap gui/$$(id -u) ~/Library/LaunchAgents/$(PLIST).plist
+	sed 's|__REPO__|$(CURDIR)|g' launchd/$(PLIST_DAILY).plist > ~/Library/LaunchAgents/$(PLIST_DAILY).plist
+	launchctl bootout gui/$$(id -u)/$(PLIST_DAILY) 2>/dev/null || true
+	launchctl bootstrap gui/$$(id -u) ~/Library/LaunchAgents/$(PLIST_DAILY).plist
 	launchctl print gui/$$(id -u)/$(PLIST) | grep -E "state|program|run interval|next" || true
 uninstall-launchd:
 	launchctl bootout gui/$$(id -u)/$(PLIST) 2>/dev/null || true
-	rm -f ~/Library/LaunchAgents/$(PLIST).plist
+	launchctl bootout gui/$$(id -u)/$(PLIST_DAILY) 2>/dev/null || true
+	rm -f ~/Library/LaunchAgents/$(PLIST).plist ~/Library/LaunchAgents/$(PLIST_DAILY).plist
 
 clean:
 	rm -rf dist

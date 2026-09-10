@@ -150,6 +150,7 @@ try:
         sj=json.load(open(os.path.join(OUT,"subs_raw.json"))); SUBS=sj.get("subs",{}); SUBS_PULLED=sj.get("pulled","")
     except Exception: pass
     print("submissions",len(SUBS),"issuers","pulled",SUBS_PULLED)
+
 except Exception as e:
     print("SEC join skipped:",e); MANOUT={}
 # Regulatory calendar: company-disclosed PDUFA / AdCom / resubmission dates from SEC EDGAR full-text search (pull_pdufa.py)
@@ -329,6 +330,20 @@ if os.path.exists(pp):
                "changed":[{"id":i,**c} for i,c in ch.items()]},open(hp,"w"),separators=(",",":"))
     print("diff vs",DIFF["prev_pulled"][:10],{k:v for k,v in summ.items() if k not in("new","gone")},"new",len(summ["new"]),"gone",len(summ["gone"]),"→",os.path.basename(hp))
 else: print("no prev_snapshot.json.gz — diff skipped")
+# registry version history for changed trials (pull_history.py) and company-guided milestones (pull_guidance.py)
+HIST={}; HIST_PULLED=""; HIST_SINCE=""
+try:
+    hj=json.load(open(os.path.join(OUT,"history_raw.json"))); HIST=hj.get("hist",{}); HIST_PULLED=hj.get("pulled",""); HIST_SINCE=hj.get("since","")
+except Exception: pass
+for t in rows:
+    h=HIST.get(t["id"])
+    if h: t["hist"]=h
+GUID={"pulled":"","source":"","rows":[]}
+try:
+    gj=json.load(open(os.path.join(OUT,"guidance_raw.json")))
+    GUID={"pulled":gj.get("pulled",""),"source":gj.get("source",""),"window":gj.get("window"),"rows":[{k:r.get(k) for k in ("milestone","date","precision","asset","sentence","ticker","cik","company","filed","form","source")} for r in gj.get("rows",[]) if r.get("ticker")]}
+except Exception: pass
+print("history",len(HIST),"trials","| guidance rows",len(GUID["rows"]))
 # per-loader status: what was pulled when, and how many rows made it in; the Method tab shows this table and refresh writes it to data/status.json
 try: _fp=FACTS_PULLED
 except NameError: _fp=""
@@ -347,12 +362,39 @@ STATUS={"trials":{"pulled":d["pulled"],"rows":len(rows),"source":"ClinicalTrials
         "formd":{"pulled":FD.get("pulled",""),"rows":len(FD.get("issuers",{})),"source":"SEC Form D data sets"},
         "nih":{"pulled":NIH.get("pulled",""),"rows":len(NIH.get("orgs",{})),"source":"NIH RePORTER"},
         "px":{"pulled":_px,"rows":_pxn,"source":"last close, Yahoo chart / Nasdaq quote (unofficial)"},
-        "subs":{"pulled":_sp,"rows":_spn,"source":"SEC EDGAR submissions per matched issuer"}}
+        "subs":{"pulled":_sp,"rows":_spn,"source":"SEC EDGAR submissions per matched issuer"},
+        "hist":{"pulled":HIST_PULLED,"rows":len(HIST),"source":"ClinicalTrials.gov version history, changed trials only"},
+        "guid":{"pulled":GUID.get("pulled",""),"rows":len(GUID["rows"]),"source":"SEC EDGAR full-text search, company-guided milestones (8-K / 6-K)"}}
 json.dump({"built":datetime.datetime.utcnow().isoformat()+"Z","loaders":STATUS},open(os.path.join(OUT,"status.json"),"w"),indent=1)
-snap={"meta":{"pulled":d["pulled"],"ct_query":d["query"],"n_trials":len(rows),"n_fda":len(fda),"built":datetime.datetime.utcnow().isoformat()+"Z"},"status":STATUS,"trials":rows,"fda":fda,"longevity":LV,"sec":SEC,"subs":_subs,"secman":MANOUT,"reg":REG,"f13":F13,"ins":INSD,"formd":FD,"nih":NIH,"diff":DIFF,"sec_pulled":sec.get("pulled","") if SEC else ""}
+snap={"meta":{"pulled":d["pulled"],"ct_query":d["query"],"n_trials":len(rows),"n_fda":len(fda),"built":datetime.datetime.utcnow().isoformat()+"Z"},"status":STATUS,"trials":rows,"fda":fda,"longevity":LV,"sec":SEC,"subs":_subs,"guid":GUID,"hist_since":HIST_SINCE,"secman":MANOUT,"reg":REG,"f13":F13,"ins":INSD,"formd":FD,"nih":NIH,"diff":DIFF,"sec_pulled":sec.get("pulled","") if SEC else ""}
 js=json.dumps(snap,separators=(",",":"),ensure_ascii=False)
 open(os.path.join(OUT,"snapshot.json"),"w").write(js)
 with gzip.open(os.path.join(OUT,"snapshot.json.gz"),"wb",compresslevel=9) as g: g.write(js.encode())
 print(len(rows),len(fda),len(js),os.path.getsize(os.path.join(OUT,"snapshot.json.gz")))
+# changes feed: what moved since the weekly baseline, as JSON and RSS (published beside the app; the dashboard's change log reads the same list)
+def _feed():
+    since=DIFF.get("prev_pulled","")[:10]; items=[]
+    for t in rows:
+        if not (t.get("chg") or t.get("new")): continue
+        if t.get("new"): what=["new in the registry"]
+        else: what=[f"{lab}: {old} → {new}" for lab,old,new in t["chg"]]
+        kind="new" if t.get("new") else ("slipped" if (t.get("slip") or 0)>=1 and not t.get("frm") else "firmed" if t.get("frm") else "status" if any(l=="status" for l,_,_ in t["chg"]) else "changed")
+        items.append({"id":t["id"],"kind":kind,"title":t["t"],"sponsor":t["sp"],"phase":t["ph"],"pcd":t["pcd"],"what":what,"date":t.get("lu",""),"url":"https://saros.gcarosso.bio/#t="+t["id"],"registry":"https://clinicaltrials.gov/study/"+t["id"]})
+    for r in REG.get("rows",[]):
+        if r.get("history"):
+            items.append({"id":r.get("ticker") or "","kind":"regulatory","title":f"{r.get('company','')} · {r.get('asset') or r['kind']} · {r['date']}","sponsor":r.get("company",""),"what":[f"{h['date']} → {r['date']}" for h in r["history"][-1:]],"date":r.get("filed",""),"url":"https://saros.gcarosso.bio/#tab=fda","registry":r.get("source","")})
+    items.sort(key=lambda x:(x.get("date") or ""),reverse=True)
+    feed={"generated":snap["meta"]["built"],"since":since,"n":len(items),"items":items[:500]}
+    json.dump(feed,open(os.path.join(OUT,"changes.json"),"w"),indent=1)
+    from xml.sax.saxutils import escape as X
+    rss=['<?xml version="1.0" encoding="UTF-8"?>','<rss version="2.0"><channel>','<title>SAROS changes</title>','<link>https://saros.gcarosso.bio/</link>',
+         f'<description>Registry and regulatory changes since the {since} snapshot: slipped, firmed and new trials, status changes, moved PDUFA dates. Public sources only.</description>',
+         f'<lastBuildDate>{X(snap["meta"]["built"])}</lastBuildDate>']
+    for it in items[:200]:
+        rss.append(f"<item><title>{X(it['kind'].upper()+' · '+it['title'][:110])}</title><link>{X(it['url'])}</link><guid isPermaLink=\"false\">{X(it['id']+':'+it['kind']+':'+(it.get('date') or ''))}</guid><description>{X(it['sponsor']+' · '+'; '.join(it['what'])[:400])}</description></item>")
+    rss.append('</channel></rss>')
+    open(os.path.join(OUT,"changes.xml"),"w").write("\n".join(rss))
+    print("changes feed",len(items),"items since",since)
+_feed()
 print(collections.Counter(r["ta"] for r in rows).most_common())
 print(collections.Counter(r["mo"] for r in rows).most_common())

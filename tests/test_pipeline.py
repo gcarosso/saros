@@ -86,6 +86,28 @@ def test_submissions_compact_keeps_the_right_forms():
     assert forms.count("8-K") == 1, "8-Ks older than 12 months are dropped"
     assert out[0]["url"].startswith("https://www.sec.gov/Archives/edgar/data/1710072/")
 
+def test_guidance_extractor_finds_company_dates_and_skips_pdufa_and_boilerplate():
+    import datetime
+    pg = importlib.import_module("pull_guidance")
+    today = datetime.date(2026, 9, 10)
+    txt = ("We expect to report topline data from the Phase 3 GRAND CANYON study of EDG-5506 in the second half of 2026. "
+           "The FDA has set a PDUFA target action date of March 11, 2027 for Reblozyl. "
+           "Enrollment completion is anticipated in 1Q 2027. "
+           "Forward-looking statements include statements about topline data expected in 2027 and actual results may differ.")
+    rows = pg.extract(txt, today)
+    kinds = {(r["milestone"], r["date"], r["precision"]) for r in rows}
+    assert ("readout", "2026-12-31", "half") in kinds and ("enrollment", "2027-03-31", "quarter") in kinds
+    assert not any(r["date"] == "2027-03-11" for r in rows), "PDUFA sentences belong to the regulatory calendar"
+    assert not any("Forward-looking" in r["sentence"] for r in rows), "boilerplate is not guidance"
+    assert any(r["asset"] and r["asset"].startswith("EDG-5506") for r in rows)
+
+def test_diff_reports_primary_outcome_text_changes():
+    sd = importlib.import_module("diff")
+    prev = [{"id": "NCT1", "pcd": "2026-12", "pct": "ESTIMATED", "st": "RECRUITING", "n": 100, "ws": "", "po": "Change in AEs"}]
+    cur = [{"id": "NCT1", "pcd": "2026-12", "pct": "ESTIMATED", "st": "RECRUITING", "n": 100, "ws": "", "po": "Change in adverse events"}]
+    ch, summ = sd.diff_trials(prev, cur)
+    assert ch["NCT1"]["chg"] == [["primary outcome text", "Change in AEs", "Change in adverse events"]] and ch["NCT1"]["slip"] == 0
+
 def test_aging_flag_is_word_bounded():
     ag = _rx("AG")
     assert ag.search("A study of healthy aging and frailty") and ag.search("anti-ageing intervention")
