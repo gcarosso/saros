@@ -5,7 +5,7 @@ It is the only BPC field with no free substitute already in the build (cash, mar
 financials come from SEC; LoA is a separate rebuild). This replaces it with company-disclosed dates,
 each citing the filing it came from — better provenance than an aggregator, and ours to publish.
 
-**Status: shipped 2026-09-05.** `data/pull_pdufa.py` is wired into `process.py` (snapshot `reg`), the FDA tab, the dossier and the weekly `make refresh` (`--incremental`, trailing 3 weeks). The BPC path, files and scripts are gone from the repo (private copies moved to `~/Desktop/g-claude/bpc_private/`).
+**Status: shipped 2026-09-05.** `data/pull_pdufa.py` is wired into `process.py` (snapshot `reg`), the FDA tab, the dossier and the weekly `make refresh` (`--incremental`, trailing 3 weeks). The BPC path, files and scripts are gone from the repo.
 
 ## Measured first pass (2026-09-05)
 8-K only, 18-month window, 6 query phrases, crude regex, 530 filings parsed:
