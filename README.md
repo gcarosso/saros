@@ -10,7 +10,7 @@ Live at [saros.gcarosso.bio](https://saros.gcarosso.bio). Built by [Giovanni Car
 
 SAROS is a clinical trial readout calendar for specialist biotech investors. It holds every industry-sponsored Phase 1–3 trial registered on ClinicalTrials.gov with a primary-completion date in 2026–2028 (10,000+), and joins each one to what public filings say about the sponsor: cash and runway from SEC XBRL, specialist-fund ownership from 13F, insider trades from Form 4, PDUFA and advisory-committee dates as disclosed in SEC filings, private rounds from Form D, NIH awards, and a curated mechanism note. It is a single HTML file with no server. A plain-text summary of the method is at [saros.gcarosso.bio/method](https://saros.gcarosso.bio/method).
 
-## What you can do with it
+## Functionalities
 
 - **See what reads out when** — 10,000+ trials by registered primary-completion month; filter by phase, status, area, modality, sponsor tier, target or enrollment; click any bar, cell or sponsor to focus.
 - **Open a dossier** — next action and the rule behind it, readout confidence with reasons, cash-to-event, holders, insider trades, mechanism, an editable rNPV sketch, and every competing trial in the indication.
@@ -51,7 +51,7 @@ open dist/saros.html
 `make refresh` runs the whole chain; `launchd/` schedules it weekly on a Mac. The pipeline is standard-library Python;
 `node` is needed only for the JS syntax test and Google Chrome only for the headless render test.
 
-## What it will not tell you
+## Limitations
 
 - **Registered dates lag real readouts.** A primary-completion date is when a readout can first exist, not when it will land; open-label early-phase programs drift the most, and June and December pile-ups are sponsor placeholders.
 - **Private companies stay opaque.** Round valuations, terms, cap tables and private burn are not public; they are shown as unknown, never estimated.
