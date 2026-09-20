@@ -7,6 +7,12 @@ snap=sys.argv[1] if len(sys.argv)>1 else os.path.join(here,'data','snapshot.json
 b64=base64.b64encode(open(snap,'rb').read()).decode()
 rd=lambda *p:open(os.path.join(here,'src',*p),encoding='utf-8').read()
 head,body,a1,a2=rd('head.html'),rd('body.html'),rd('app1.js'),rd('app2.js')
+# Embed approved self-hosted fonts so the downloadable dashboard stays standalone.
+for font in re.findall(r'<!--FONT:([A-Za-z0-9-]+)-->', head):
+    font_path=os.path.join(here,'public','fonts',font+'.woff2')
+    font_uri='data:font/woff2;base64,'+base64.b64encode(open(font_path,'rb').read()).decode()
+    head=head.replace(f'<!--FONT:{font}-->',font_uri)
+
 for page in re.findall(r'<!--PAGE:([a-z]+)-->',body):
     body=body.replace(f'<!--PAGE:{page}-->',rd('pages',page+'.html'))
 # one logo, two uses: inline mark in the brand and the tab icon (same SVG as a data URI)
