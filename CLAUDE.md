@@ -7,7 +7,7 @@ handed to Claude Code for the build/data pipeline from here on. v8 (also Cowork,
 
 ## Non-negotiables (from Gio)
 - High signal-to-noise and information density without overwhelming: progressive disclosure (KPI → chart → table → dossier).
-- Black background, TradingView-crisp: IBM Plex Sans UI, IBM Plex Mono for every number; palette and tokens live in `src/head.html`. Do not introduce a light theme.
+- Warm near-black background (`#0b0a09`), TradingView-crisp: Geist UI, Geist Mono for every number, embedded as data URIs by `build.py` so the HTML stays standalone (the 2026-09-19 reskin, approved by Gio, replaced IBM Plex and the blue-black ground); palette and tokens live in `src/head.html`. Do not introduce a light theme.
 - Tone and interpretation follow the Verdad "Biotech Investing" white paper (in this folder): trials are coordinates, not oracles; the sponsor's research program is the unit; specialist consensus (13F), insiders (Form 4) and short interest are the quality signals; spending-anchored value; long AND short side; honest denominators.
 - Prioritise longevity companies from `longevity_funding_2026-07.csv` when choosing focus content.
 - Every click should reveal more (hover cards, dossier drawer, click-to-filter). Clicking a drug asset must show mechanism of action (lexicon tags + curated note + on-demand AI explainer).

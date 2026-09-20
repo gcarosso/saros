@@ -365,7 +365,15 @@ STATUS={"trials":{"pulled":d["pulled"],"rows":len(rows),"source":"ClinicalTrials
         "subs":{"pulled":_sp,"rows":_spn,"source":"SEC EDGAR submissions per matched issuer"},
         "hist":{"pulled":HIST_PULLED,"rows":len(HIST),"source":"ClinicalTrials.gov version history, changed trials only"},
         "guid":{"pulled":GUID.get("pulled",""),"rows":len(GUID["rows"]),"source":"SEC EDGAR full-text search, company-guided milestones (8-K / 6-K)"}}
-json.dump({"built":datetime.datetime.utcnow().isoformat()+"Z","loaders":STATUS},open(os.path.join(OUT,"status.json"),"w"),indent=1)
+# headline figures for outside readers of status.json (the gcarosso.bio home strip). Same rule as the dashboard's
+# "P3 readouts ≤ 180 d" KPI: phase exactly P3, primary completion 0–180 days ahead inclusive, month-only dates read as the 15th,
+# every registry status counted. The dashboard counts from the viewer's clock; this counts from the build date (UTC).
+def _days_ahead(pcd,_today=datetime.datetime.utcnow().date()):
+    try: return (datetime.date.fromisoformat(pcd+"-15" if len(pcd)==7 else pcd)-_today).days
+    except Exception: return None
+KPI={"p3_180":sum(1 for t in rows if t.get("ph")=="P3" and t.get("pcd") and (_days_ahead(t["pcd"]) is not None) and 0<=_days_ahead(t["pcd"])<=180),
+     "sec_issuers":len({int(c) for c in (str(v.get("cik","")).strip() for v in list(SEC.values())+list(MANOUT.values()) if isinstance(v,dict)) if c.isdigit()}) if SEC else 0}
+json.dump({"built":datetime.datetime.utcnow().isoformat()+"Z","loaders":STATUS,"kpi":KPI},open(os.path.join(OUT,"status.json"),"w"),indent=1)
 snap={"meta":{"pulled":d["pulled"],"ct_query":d["query"],"n_trials":len(rows),"n_fda":len(fda),"built":datetime.datetime.utcnow().isoformat()+"Z"},"status":STATUS,"trials":rows,"fda":fda,"longevity":LV,"sec":SEC,"subs":_subs,"guid":GUID,"hist_since":HIST_SINCE,"secman":MANOUT,"reg":REG,"f13":F13,"ins":INSD,"formd":FD,"nih":NIH,"diff":DIFF,"sec_pulled":sec.get("pulled","") if SEC else ""}
 js=json.dumps(snap,separators=(",",":"),ensure_ascii=False)
 open(os.path.join(OUT,"snapshot.json"),"w").write(js)
